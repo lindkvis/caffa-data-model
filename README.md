@@ -1,2 +1,2 @@
-# caffa-data-model
+# Caffa Data Model
 C++ Application Framework for Introspection
