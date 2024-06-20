@@ -21,7 +21,6 @@
 // ##################################################################################################
 #include "cafAssert.h"
 
-#include <iostream>
 #include <vector>
 
 namespace caffa
@@ -79,7 +78,6 @@ void ChildField<DataTypePtr>::setObject( std::shared_ptr<DataType> object )
     if ( !m_fieldDataAccessor )
     {
         std::string errorMessage = "Failed to set object for '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
         throw std::runtime_error( errorMessage );
     }
 
@@ -97,9 +95,7 @@ std::vector<std::shared_ptr<ObjectHandle>> ChildField<DataTypePtr>::childObjects
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to get child objects for '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to get child objects for '" + this->keyword() + "': Field is not accessible" );
     }
 
     auto object = m_fieldDataAccessor->object();
@@ -119,9 +115,7 @@ std::vector<std::shared_ptr<const ObjectHandle>> ChildField<DataTypePtr>::childO
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to get child objects for '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to get child objects for '" + this->keyword() + "': Field is not accessible" );
     }
 
     auto object = m_fieldDataAccessor->object();
@@ -140,9 +134,7 @@ void ChildField<DataTypePtr>::clear()
     CAFFA_ASSERT( isInitialized() );
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to clear object for '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to clear object for '" + this->keyword() + "': Field is not accessible" );
     }
 
     m_fieldDataAccessor->clear();
@@ -158,9 +150,7 @@ void ChildField<DataTypePtr>::removeChildObject( std::shared_ptr<const ObjectHan
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to remove object for '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to remove object for '" + this->keyword() + "': Field is not accessible" );
     }
 
     if ( this->object() == object )

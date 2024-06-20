@@ -47,10 +47,8 @@ std::shared_ptr<typename ChildArrayField<DataTypePtr>::DataType> ChildArrayField
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to get object at " + std::to_string( index ) + " for '" + this->keyword() +
-                                   "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to get object at " + std::to_string( index ) + " for '" + this->keyword() +
+                                  "': Field is not accessible" );
     }
 
     return std::dynamic_pointer_cast<DataType>( m_fieldDataAccessor->at( index ) );
@@ -67,9 +65,7 @@ void ChildArrayField<DataTypePtr>::push_back( std::shared_ptr<DataType> pointer 
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to add object to '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to add object to '" + this->keyword() + "': Field is not accessible" );
     }
 
     m_fieldDataAccessor->push_back( pointer );
@@ -103,10 +99,8 @@ void ChildArrayField<DataTypePtr>::insert( size_t index, std::shared_ptr<DataTyp
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to insert object at " + std::to_string( index ) + " in '" + this->keyword() +
-                                   "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to insert object at " + std::to_string( index ) + " in '" + this->keyword() +
+                                  "': Field is not accessible" );
     }
 
     m_fieldDataAccessor->insert( index, pointer );
@@ -137,9 +131,7 @@ void ChildArrayField<DataTypePtr>::clear()
     CAFFA_ASSERT( isInitialized() );
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to clear objects from '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to clear objects from '" + this->keyword() + "': Field is not accessible" );
     }
     return m_fieldDataAccessor->clear();
 }
@@ -155,10 +147,8 @@ void ChildArrayField<DataTypePtr>::erase( size_t index )
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to remove object " + std::to_string( index ) + " from '" + this->keyword() +
-                                   "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to remove object " + std::to_string( index ) + " from '" + this->keyword() +
+                                  "': Field is not accessible" );
     }
     m_fieldDataAccessor->remove( index );
 }
@@ -190,9 +180,7 @@ void ChildArrayField<DataTypePtr>::removeChildObject( std::shared_ptr<const Obje
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to remove object from '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to remove object from '" + this->keyword() + "': Field is not accessible" );
     }
 
     if ( object )
@@ -214,9 +202,7 @@ std::vector<std::shared_ptr<ObjectHandle>> ChildArrayField<DataTypePtr>::childOb
 {
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to get child objects from '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to get child objects from '" + this->keyword() + "': Field is not accessible" );
     }
     return m_fieldDataAccessor->objects();
 }
@@ -232,9 +218,7 @@ std::vector<std::shared_ptr<const ObjectHandle>> ChildArrayField<DataTypePtr>::c
 
     if ( !accessor )
     {
-        std::string errorMessage = "Failed to get child objects from '" + this->keyword() + "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to get child objects from '" + this->keyword() + "': Field is not accessible" );
     }
     return accessor->objects();
 }
@@ -286,10 +270,8 @@ std::shared_ptr<ObjectHandle> ChildArrayField<DataTypePtr>::at( size_t index )
 
     if ( !m_fieldDataAccessor )
     {
-        std::string errorMessage = "Failed to get object at " + std::to_string( index ) + " from '" + this->keyword() +
-                                   "': Field is not accessible";
-        CAFFA_ERROR( errorMessage );
-        throw std::runtime_error( errorMessage );
+        throw std::runtime_error( "Failed to get object at " + std::to_string( index ) + " from '" + this->keyword() +
+                                  "': Field is not accessible" );
     }
 
     return m_fieldDataAccessor->at( index );

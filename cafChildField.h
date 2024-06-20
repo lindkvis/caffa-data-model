@@ -74,7 +74,6 @@ public:
         if ( !m_fieldDataAccessor )
         {
             std::string errorMessage = "Failed to get object for '" + this->keyword() + "': Field is not accessible";
-            CAFFA_ERROR( errorMessage );
             throw std::runtime_error( errorMessage );
         }
 
@@ -85,7 +84,6 @@ public:
         if ( !m_fieldDataAccessor )
         {
             std::string errorMessage = "Failed to get object for '" + this->keyword() + "': Field is not accessible";
-            CAFFA_ERROR( errorMessage );
             throw std::runtime_error( errorMessage );
         }
 
