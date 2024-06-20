@@ -1,0 +1,27 @@
+# ninja log v5
+1	1005	1718871035789650501	Base/CMakeFiles/caffaBase.dir/Debug/cafAssert.cpp.o	b06782d10616ecb5
+0	1067	1718871035853650933	CMakeFiles/caffaDataModel.dir/Debug/cafFieldHandle.cpp.o	b994dfbe7a0f2a43
+1	1152	1718871035937651500	Base/Base_UnitTests/CMakeFiles/caffaBase_UnitTests.dir/Debug/cafBase_UnitTests.cpp.o	b5174a4b4d2950c1
+1	1185	1718871035969651716	Base/CMakeFiles/caffaBase.dir/Debug/cafStringTools.cpp.o	dfc933bf284e4c0
+1	1217	1718871036001651932	CMakeFiles/caffaDataModel.dir/Debug/cafVisitor.cpp.o	56596840c8d6a0f
+1	1331	1718871036117652716	CMakeFiles/caffaDataModel.dir/Debug/cafDefaultObjectFactory.cpp.o	8f628c439af179e3
+2	1547	1718871036333654175	Base/Base_UnitTests/CMakeFiles/caffaBase_UnitTests.dir/Debug/cafUuidGeneratorTests.cpp.o	387cc0c5f6094664
+0	1668	1718871036453654985	CMakeFiles/caffaDataModel.dir/Debug/cafObjectHandle.cpp.o	1f2a6797468ea6f4
+2	1801	1718871036585655877	DataModel_UnitTests/CMakeFiles/caffaDataModel_UnitTests.dir/Debug/cafDataModel_UnitTests.cpp.o	a3de4bfd9a8b53e9
+1331	2319	1718871037105659390	CMakeFiles/caffaDataModel.dir/Debug/cafChildFieldHandle.cpp.o	bb6b66fc01dbfef5
+1217	2324	1718871037109659417	CMakeFiles/caffaDataModel.dir/Debug/cafChildArrayFieldAccessor.cpp.o	25cb6a8774da4590
+1185	2568	1718871037353661065	DataModel_UnitTests/CMakeFiles/caffaDataModel_UnitTests.dir/Debug/TestObj.cpp.o	4936f6c7840e99
+1068	2593	1718871037377661228	DataModel_UnitTests/CMakeFiles/caffaDataModel_UnitTests.dir/Debug/Child.cpp.o	1280c81e53ecc5da
+1152	3161	1718871037945665065	DataModel_UnitTests/CMakeFiles/caffaDataModel_UnitTests.dir/Debug/Parent.cpp.o	670f20caf73e75ed
+1	3577	1718871038357667848	Base/CMakeFiles/caffaBase.dir/Debug/cafUuidGenerator.cpp.o	6784651a0966cad3
+1005	3961	1718871038741670439	DataModel_UnitTests/CMakeFiles/caffaDataModel_UnitTests.dir/Debug/cafChildArrayFieldHandleTest.cpp.o	f9815a53f1d65727
+2	5059	1718871039837677846	DataModel_UnitTests/CMakeFiles/caffaDataModel_UnitTests.dir/Debug/cafDataModelBasicTest.cpp.o	2cd2cf4f887ea732
+1	7641	1718871042413695244	Base/CMakeFiles/caffaBase.dir/Debug/cafLogger.cpp.o	931e7e88d255ac69
+7641	7926	1718871042709697247	lib/Debug/libcaffaBase.so.1.0.0	81ab294eb9af5892
+7926	7933	1718871042709697247	lib/Debug/libcaffaBase.so.1	19d0e4f4ee4fe09c
+7926	7933	1718871042709697247	lib/Debug/libcaffaBase.so	19d0e4f4ee4fe09c
+7933	8025	1718871042809697922	bin/Debug/caffaBase_UnitTests	5ca4d08e03b21409
+7933	8033	1718871042817697975	lib/Debug/libcaffaDataModel.so.1.0.0	a1b5f283e5fee12e
+8033	8040	1718871042817697975	lib/Debug/libcaffaDataModel.so.1	fbcdab83af2f25c6
+8033	8040	1718871042817697975	lib/Debug/libcaffaDataModel.so	fbcdab83af2f25c6
+8040	8285	1718871043069699675	bin/Debug/caffaDataModel_UnitTests	3b49c4954868c113
