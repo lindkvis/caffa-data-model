@@ -83,7 +83,7 @@ public:
         m_value = m_defaultValue;
         setFromLabel( value );
     }
-
+    ~AppEnum() = default;
     Enum value() const
     {
         if ( m_value )
