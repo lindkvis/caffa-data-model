@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Child.h"
+
 #include "cafField.h"
 #include "cafObjectHandle.h"
 #include "cafObjectMacros.h"
-
-class Child;
 
 class Parent : public caffa::ObjectHandle
 {

@@ -21,6 +21,8 @@
 // ##################################################################################################
 #pragma once
 
+#include "cafFieldHelper.h"
+
 #include <string>
 #include <utility>
 
@@ -88,9 +90,9 @@ private:
  * @brief Used to validate the value of data fields
  * Implementations need the the validate method as well as readFromString and writeToString.
  *
- * @tparam DataType
+ * @tparam FieldType
  */
-template <typename DataType>
+template <typename FieldType>
 class FieldValidator : public FieldValidatorInterface
 {
 public:
@@ -108,7 +110,8 @@ public:
      * @return true if the value is acceptable
      * @return false if not
      */
-    virtual std::pair<bool, std::string> validate( const DataType& value ) const = 0;
+    virtual std::pair<bool, std::string>
+        validate( const typename FieldHelper<FieldType>::SerializationType& value ) const = 0;
 };
 
 } // namespace caffa

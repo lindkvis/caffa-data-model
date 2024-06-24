@@ -23,8 +23,10 @@
 
 #include "cafAssert.h"
 #include "cafFieldHandle.h"
+#include "cafFieldHelper.h"
 #include "cafFieldValidator.h"
 #include "cafLogger.h"
+#include "cafObjectHandlePortableDataType.h"
 #include "cafPortableDataType.h"
 #include "cafValueProxy.h"
 #include "cafVisitor.h"
@@ -35,97 +37,16 @@
 
 namespace caffa
 {
-template <typename DataType>
-class Field;
-
-template <typename DataType>
-class FieldHelper
-{
-public:
-    using Type        = DataType;
-    using ContentType = DataType;
-    using FieldType   = Field<Type>;
-
-    static const ContentType& dereference( const Type& data ) { return data; }
-    static const ContentType* pointer( const Type& data ) { return &data; }
-
-    static ContentType& dereference( Type& data ) { return data; }
-    static ContentType* pointer( Type& data ) { return &data; }
-
-    static void arrangeVisit( Inspector* inspector, const FieldType* self ) { inspector->visit( self ); }
-    static void arrangeVisit( Editor* editor, FieldType* self ) { editor->visit( self ); }
-};
-
-template <typename DataType>
-class FieldHelper<std::shared_ptr<DataType>>
-{
-public:
-    using Type        = std::shared_ptr<DataType>;
-    using ContentType = DataType;
-    using FieldType   = Field<Type>;
-
-    static const ContentType& dereference( const Type& data ) { return *data; }
-    static const ContentType* pointer( const Type& data ) { return data.get(); }
-
-    static ContentType& dereference( Type& data ) { return *data; }
-    static ContentType* pointer( Type& data ) { return data.get(); }
-
-    static void arrangeVisit( Inspector* inspector, const FieldType* self )
-    {
-        inspector->visit( self );
-        inspector->visit( self->m_value.get() );
-    }
-    static void arrangeVisit( Editor* editor, FieldType* self )
-    {
-        editor->visit( self );
-        if ( self->m_value )
-        {
-            editor->visit( self->m_value.get() );
-        }
-    }
-};
-
-template <typename DataType>
-class FieldHelper<std::vector<std::shared_ptr<DataType>>>
-{
-public:
-    using Type        = std::vector<std::shared_ptr<DataType>>;
-    using ContentType = Type;
-    using FieldType   = Field<Type>;
-
-    static const ContentType& dereference( const Type& data ) { return data; }
-    static const ContentType* pointer( const Type& data ) { return &data; }
-
-    static ContentType& dereference( Type& data ) { return data; }
-    static ContentType* pointer( Type& data ) { return &data; }
-
-    static void arrangeVisit( Inspector* inspector, const FieldType* self )
-    {
-        inspector->visit( self );
-        for ( auto objPtr : self->m_value )
-        {
-            inspector->visit( objPtr.get() );
-        }
-    }
-    static void arrangeVisit( Editor* editor, FieldType* self )
-    {
-        editor->visit( self );
-        for ( auto objPtr : self->m_value )
-        {
-            editor->visit( objPtr.get() );
-        }
-    }
-};
-
 /**
  * Typed field class.
  */
-template <typename DataType>
+template <typename T>
 class Field : public FieldHandle
 {
 public:
-    using Type        = FieldHelper<DataType>::Type;
-    using ContentType = FieldHelper<DataType>::ContentType;
+    using DataType          = FieldHelper<T>::Type;
+    using ContentType       = FieldHelper<T>::ContentType;
+    using SerializationType = FieldHelper<T>::SerializationType;
     /**
      * Main constructor with default initialisation of the value
      */
@@ -143,7 +64,7 @@ public:
      * Get a portable string representation of the data type
      * @return a data type name represented as a string
      */
-    std::string dataType() const override { return PortableDataType<DataType>::name(); }
+    std::string dataType() const override { return PortableDataType<T>::name(); }
 
     /**
      * Assignment of field value from another field
@@ -161,7 +82,7 @@ public:
      * @param other The new value
      * @return this
      */
-    Field& operator=( const DataType& fieldValue )
+    Field& operator=( const SerializationType& fieldValue )
     {
         this->setValue( fieldValue );
         return *this;
@@ -171,18 +92,42 @@ public:
      * Returns the value of the field *BY VALUE*
      * @return the value of the field
      */
-    DataType value()
+    [[nodiscard]] SerializationType value()
     {
         CAFFA_ASSERT( this->isInitialized() );
-        return m_value;
+        return FieldHelper<T>::value( m_value );
     }
+
+    /**
+     * Returns the value of the field *BY VALUE*
+     * @return the value of the field
+     */
+    [[nodiscard]] SerializationType value() const
+    {
+        CAFFA_ASSERT( this->isInitialized() );
+        return FieldHelper<T>::value( m_value );
+    }
+
+    /**
+     * @brief Returns a reference to the field content
+     *
+     * @return const DataType&
+     */
+    const DataType& reference() const { return m_value; }
+
+    /**
+     * @brief Returns a reference to the field content
+     *
+     * @return DataType&
+     */
+    DataType& reference() { return m_value; }
 
     /**
      * Assign a new value and check the validators
      * @param fieldValue the new value
      * @throws Throws std::runtime_error if a validation failed.
      */
-    void setValue( const DataType& fieldValue )
+    void setValue( const SerializationType& fieldValue )
     {
         CAFFA_ASSERT( this->isInitialized() );
 
@@ -217,10 +162,6 @@ public:
     operator ContentType&() { return FieldHelper<DataType>::dereference( m_value ); }
 
     operator const ContentType&() const { return FieldHelper<DataType>::dereference( m_value ); }
-
-    const ContentType& operator*() const { return FieldHelper<DataType>::dereference( m_value ); }
-
-    ContentType& operator*() { return FieldHelper<DataType>::dereference( m_value ); }
 
     const ContentType* operator->() const { return FieldHelper<DataType>::pointer( m_value ); }
 
@@ -260,17 +201,18 @@ public:
     void accept( Editor* editor ) override { FieldHelper<DataType>::arrangeVisit( editor, this ); }
 
 public:
-    std::optional<Type> defaultValue() const { return m_defaultValue; }
-    void                setDefaultValue( const Type& val ) { m_defaultValue = val; }
+    std::optional<DataType> defaultValue() const { return m_defaultValue; }
+    void                    setDefaultValue( const DataType& val ) { m_defaultValue = val; }
 
-    bool operator==( const Field<DataType>& rhs ) const  = delete;
-    auto operator<=>( const Field<DataType>& rhs ) const = delete;
+    bool operator==( const Field<DataType>& rhs ) const { return m_value == rhs.m_value; }
+
+    auto operator<=>( const Field<DataType>& rhs ) const { return m_value <=> rhs.m_value; }
 
 private:
     friend class FieldHelper<DataType>;
 
     DataType                                               m_value;
-    std::optional<Type>                                    m_defaultValue;
+    std::optional<DataType>                                m_defaultValue;
     std::vector<std::unique_ptr<FieldValidator<DataType>>> m_valueValidators;
 };
 

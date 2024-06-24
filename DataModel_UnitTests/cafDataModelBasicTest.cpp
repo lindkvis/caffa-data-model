@@ -144,16 +144,16 @@ TEST( DataModelTest, TestField )
     ASSERT_DOUBLE_EQ( 1.2, a->m_memberDoubleField.value() );
 
     // Simpler access
-    ASSERT_DOUBLE_EQ( 1.2, *a->m_memberDoubleField );
+    ASSERT_DOUBLE_EQ( 1.2, a->m_memberDoubleField.reference() );
     a->m_memberDoubleField = 42.0;
-    ASSERT_DOUBLE_EQ( 42.0, *a->m_memberDoubleField );
-    ASSERT_EQ( 0, *a->m_memberIntField );
+    ASSERT_DOUBLE_EQ( 42.0, a->m_memberDoubleField.value() );
+    ASSERT_EQ( 0, a->m_memberIntField.value() );
     ASSERT_NO_THROW( a->m_memberIntField = 1000 );
     ASSERT_NO_THROW( a->m_memberIntField = -10 );
     ASSERT_NO_THROW( a->m_memberIntField = 11 );
     ASSERT_EQ( 11, a->m_memberIntField.value() );
 
-    ASSERT_TRUE( ( *a->m_memberStringField ).empty() );
+    ASSERT_TRUE( a->m_memberStringField->empty() );
     a->m_memberStringField.setValue( "123" );
     ASSERT_TRUE( a->m_memberStringField.value() == "123" );
 }
@@ -227,7 +227,7 @@ TEST( DataModelTest, NormalField )
 
     // Operators
     // ==
-    EXPECT_FALSE( *a.field1 == *a.field3 );
+    EXPECT_FALSE( a.field1.value() == a.field3.value() );
     // = field to field
     a.field1 = a.field2;
     // value()
@@ -235,9 +235,9 @@ TEST( DataModelTest, NormalField )
     // = value to field
     a.field1 = testValue2;
     // *v
-    EXPECT_EQ( 2.3, ( *a.field1 )[2] );
+    EXPECT_EQ( 2.3, a.field1.reference()[2] );
     // = with dereference
-    a.field3 = *a.field1;
+    a.field3 = a.field1.value();
     EXPECT_TRUE( a.field1.value() == a.field3.value() );
 }
 
@@ -279,7 +279,7 @@ TEST( DataModelTest, ChildArrayField )
 
     // children by reference
     {
-        auto& objects = *ihd1->m_childArrayField;
+        auto& objects = ihd1->m_childArrayField.reference();
         EXPECT_EQ( size_t( 3 ), objects.size() );
         EXPECT_EQ( 2, s1.use_count() );
         EXPECT_EQ( 2, s2.use_count() );

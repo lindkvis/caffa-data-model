@@ -94,7 +94,7 @@ TEST( ChildArrayFieldHandle, DerivedObjects )
     containerObj->derivedObjs->push_back( s1 );
     containerObj->derivedObjs->push_back( s2 );
 
-    auto allObjects = *containerObj->derivedObjs;
+    auto allObjects = containerObj->derivedObjs.reference();
 
     auto it =
         std::find_if( allObjects.begin(), allObjects.end(), []( auto objectPtr ) { return objectPtr->id.value() == 2; } );
@@ -116,13 +116,13 @@ TEST( ChildArrayFieldHandle, DerivedOtherObjects )
     auto s1 = std::make_shared<SimpleObjDerivedOther>();
     auto s2 = std::make_shared<SimpleObjDerivedOther>();
 
-    int s2Id = *s2->id;
+    int s2Id = s2->id.value();
 
     containerObj->derivedOtherObjs->push_back( s0 );
     containerObj->derivedOtherObjs->push_back( s1 );
     containerObj->derivedOtherObjs->push_back( s2 );
 
-    auto allObjects = *containerObj->derivedOtherObjs;
+    auto allObjects = containerObj->derivedOtherObjs.reference();
 
     auto it = std::find_if( allObjects.begin(),
                             allObjects.end(),
@@ -135,7 +135,7 @@ TEST( ChildArrayFieldHandle, DerivedOtherObjects )
     containerObj->derivedOtherObjs->erase(
         std::find( containerObj->derivedOtherObjs->begin(), containerObj->derivedOtherObjs->end(), myObj ) );
 
-    allObjects = *containerObj->derivedOtherObjs;
+    allObjects = containerObj->derivedOtherObjs.reference();
 
     it = std::find_if( allObjects.begin(),
                        allObjects.end(),

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cafAssert.h"
+#include "cafPortableDataType.h"
 
 #include <functional>
 #include <type_traits>
@@ -72,11 +73,20 @@ public:
         m_valueSetter->setValue( value );
     }
 
+    ValueProxy<DataType>& operator=( const DataType& value )
+    {
+        setValue( value );
+        return *this;
+    }
+
+    ValueProxy<DataType>& operator=( const ValueProxy<DataType>& proxy )
+    {
+        setValue( proxy.value() );
+        return *this;
+    }
     // Proxy Field stuff to handle the method pointers
     // The public registering methods must be written below the private classes
     // For some reason. Forward declaration did some weirdness.
-private:
-public:
     void registerSetMethod( typename SetterMethodCB<DataType>::SetterMethodType setterMethod )
     {
         m_valueSetter = std::make_unique<SetterMethodCB<DataType>>( setterMethod );
@@ -93,6 +103,12 @@ public:
 private:
     std::unique_ptr<SetValueInterface<DataType>> m_valueSetter;
     std::unique_ptr<GetValueInterface<DataType>> m_valueGetter;
+};
+
+template <typename DataType>
+struct PortableDataType<ValueProxy<DataType>>
+{
+    static std::string name() { return PortableDataType<DataType>::name(); }
 };
 
 } // End of namespace caffa
