@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(CAFFA_VERSION 1.5.1)
+set(CAFFA_DATA_MODEL_VERSION 1.5.1)
 
-project(caffaDataModel)
+project(caffaDataModel VERSION ${CAFFA_DATA_MODEL_VERSION})
 
 include(cmake/git_submodule.cmake)
 
@@ -41,15 +41,6 @@ add_git_submodule(Base TRUE)
 
 set(PUBLIC_HEADERS
     cafAppEnum.h
-    cafChildArrayField.h
-    cafChildArrayField.inl
-    cafChildArrayFieldAccessor.h
-    cafChildFieldHandle.h
-    cafChildField.h
-    cafChildField.inl
-    cafChildFieldAccessor.h
-    cafDataFieldAccessor.h
-    cafDataField.h
     cafField.h
     cafFieldCapability.h
     cafFieldHandle.h
@@ -58,21 +49,13 @@ set(PUBLIC_HEADERS
     cafObjectPerformer.h
     cafObjectHandle.h
     cafPortableDataType.h
-    cafFieldProxyAccessor.h
-    cafChildArrayFieldHandle.h
     cafMethodHandle.h
     cafDefaultObjectFactory.h
     cafObjectFactory.h
-    cafObjectHandlePortableDataType.h)
+    cafObjectHandlePortableDataType.h
+    cafValueProxy.h)
 
-set(PROJECT_FILES
-    ${PUBLIC_HEADERS}
-    cafChildArrayFieldAccessor.cpp
-    cafChildFieldHandle.cpp
-    cafFieldHandle.cpp
-    cafObjectHandle.cpp
-    cafDefaultObjectFactory.cpp
-    cafVisitor.cpp)
+set(PROJECT_FILES ${PUBLIC_HEADERS} cafFieldHandle.cpp cafObjectHandle.cpp cafDefaultObjectFactory.cpp cafVisitor.cpp)
 
 if(CAFFA_BUILD_SHARED)
   message(STATUS "Building ${PROJECT_NAME} shared")

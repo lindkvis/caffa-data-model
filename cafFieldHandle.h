@@ -36,27 +36,8 @@ public:
     template <typename CapabilityType>
     const CapabilityType* capability() const;
 
-    /**
-     * Accept the visit by an inspecting visitor
-     * @param visitor
-     */
-    virtual void accept( Inspector* visitor ) const = 0;
-
-    /**
-     * Accept the visit by an editing visitor
-     * @param visitor
-     */
-    virtual void accept( Editor* visitor ) = 0;
-
-    /**
-     * Can the field be read. A non-scriptable field cannot be read within the client.
-     */
-    virtual bool isReadable() const = 0;
-
-    /**
-     * Can the field be written to. A non-scriptable field cannot be written to within the client.
-     */
-    virtual bool isWritable() const = 0;
+    void accept( Inspector* visitor ) const;
+    void accept( Editor* editor );
 
     bool isDeprecated() const;
     void markDeprecated();

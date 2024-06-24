@@ -20,9 +20,7 @@
 
 #include "cafVisitor.h"
 
-#include "cafChildArrayFieldHandle.h"
-#include "cafChildFieldHandle.h"
-#include "cafDataField.h"
+#include "cafFieldHandle.h"
 #include "cafObjectHandle.h"
 
 using namespace caffa;
@@ -33,7 +31,7 @@ void Inspector::visit( const ObjectHandle* object )
 
     for ( auto field : object->fields() )
     {
-        if ( field->isReadable() )
+        // if ( field->isReadable() )
         {
             field->accept( this );
         }
@@ -42,19 +40,7 @@ void Inspector::visit( const ObjectHandle* object )
     leaveObject( object );
 }
 
-void Inspector::visit( const ChildFieldBaseHandle* field )
-{
-    visitField( field );
-
-    for ( auto object : field->childObjects() )
-    {
-        object->accept( this );
-    }
-
-    leaveField( field );
-}
-
-void Inspector::visit( const DataField* field )
+void Inspector::visit( const FieldHandle* field )
 {
     visitField( field );
     leaveField( field );
@@ -66,7 +52,7 @@ void Editor::visit( ObjectHandle* object )
 
     for ( auto field : object->fields() )
     {
-        if ( field->isWritable() )
+        // if ( field->isWritable() )
         {
             field->accept( this );
         }
@@ -74,18 +60,7 @@ void Editor::visit( ObjectHandle* object )
     leaveObject( object );
 }
 
-void Editor::visit( ChildFieldBaseHandle* field )
-{
-    visitField( field );
-
-    for ( auto object : field->childObjects() )
-    {
-        object->accept( this );
-    }
-    leaveField( field );
-}
-
-void Editor::visit( DataField* field )
+void Editor::visit( FieldHandle* field )
 {
     visitField( field );
     leaveField( field );

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cafAssert.h"
-#include "cafField.h"
 
 #include <functional>
 #include <type_traits>
@@ -14,8 +13,7 @@ class SetValueInterface
 {
 public:
     virtual ~SetValueInterface() {}
-    virtual void                                         setValue( const DataType& value ) = 0;
-    virtual std::unique_ptr<SetValueInterface<DataType>> clone() const                     = 0;
+    virtual void setValue( const DataType& value ) = 0;
 };
 
 template <typename DataType>
@@ -32,11 +30,6 @@ public:
         m_setterMethod( value );
     }
 
-    virtual std::unique_ptr<SetValueInterface<DataType>> clone() const
-    {
-        return std::make_unique<SetterMethodCB<DataType>>( m_setterMethod );
-    }
-
 private:
     SetterMethodType m_setterMethod;
 };
@@ -46,8 +39,7 @@ class GetValueInterface
 {
 public:
     virtual ~GetValueInterface() {}
-    virtual DataType                                     getValue() const = 0;
-    virtual std::unique_ptr<GetValueInterface<DataType>> clone() const    = 0;
+    virtual DataType getValue() const = 0;
 };
 
 template <typename DataType>
@@ -60,34 +52,21 @@ public:
 
     DataType getValue() const { return m_getterMethod(); }
 
-    virtual std::unique_ptr<GetValueInterface<DataType>> clone() const
-    {
-        return std::make_unique<GetterMethodCB<DataType>>( m_getterMethod );
-    }
-
 private:
     GetterMethodType m_getterMethod;
 };
 
 template <typename DataType>
-class FieldProxyAccessor : public DataFieldAccessor<DataType>
+class ValueProxy
 {
 public:
-    std::unique_ptr<DataFieldAccessor<DataType>> clone() const override
-    {
-        auto copy           = std::make_unique<FieldProxyAccessor>();
-        copy->m_valueSetter = std::move( m_valueSetter->clone() );
-        copy->m_valueGetter = std::move( m_valueGetter->clone() );
-        return copy;
-    }
-
-    DataType value() override
+    DataType value()
     {
         if ( !m_valueGetter ) throw std::runtime_error( "No getter for field" );
         return m_valueGetter->getValue();
     }
 
-    void setValue( const DataType& value ) override
+    void setValue( const DataType& value )
     {
         if ( !m_valueSetter ) throw std::runtime_error( "No setter for field" );
         m_valueSetter->setValue( value );
@@ -108,8 +87,8 @@ public:
         m_valueGetter = std::make_unique<GetterMethodCB<DataType>>( getterMethod );
     }
 
-    bool hasSetter() const override { return m_valueSetter != nullptr; }
-    bool hasGetter() const override { return m_valueGetter != nullptr; }
+    bool hasSetter() const { return m_valueSetter != nullptr; }
+    bool hasGetter() const { return m_valueGetter != nullptr; }
 
 private:
     std::unique_ptr<SetValueInterface<DataType>> m_valueSetter;

@@ -23,7 +23,6 @@
 #include "cafObjectHandle.h"
 
 #include "cafAssert.h"
-#include "cafChildArrayField.h"
 #include "cafFieldHandle.h"
 #include "cafUuidGenerator.h"
 #include "cafVisitor.h"

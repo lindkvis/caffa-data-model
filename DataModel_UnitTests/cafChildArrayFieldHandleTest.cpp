@@ -1,10 +1,7 @@
 
 #include "gtest/gtest.h"
 
-#include "cafChildArrayField.h"
-#include "cafChildField.h"
 #include "cafField.h"
-#include "cafFieldProxyAccessor.h"
 #include "cafObjectHandle.h"
 #include "cafObjectMacros.h"
 
@@ -79,8 +76,8 @@ public:
 
     ~ContainerObj() {}
 
-    caffa::ChildArrayField<SimpleObjDerived*>      derivedObjs;
-    caffa::ChildArrayField<SimpleObjDerivedOther*> derivedOtherObjs;
+    caffa::Field<std::vector<std::shared_ptr<SimpleObjDerived>>>      derivedObjs;
+    caffa::Field<std::vector<std::shared_ptr<SimpleObjDerivedOther>>> derivedOtherObjs;
 };
 
 CAFFA_SOURCE_INIT( ContainerObj )
@@ -93,11 +90,11 @@ TEST( ChildArrayFieldHandle, DerivedObjects )
     auto s1 = std::make_shared<SimpleObjDerived>();
     auto s2 = std::make_shared<SimpleObjDerived>();
 
-    containerObj->derivedObjs.push_back( s0 );
-    containerObj->derivedObjs.push_back( s1 );
-    containerObj->derivedObjs.push_back( s2 );
+    containerObj->derivedObjs->push_back( s0 );
+    containerObj->derivedObjs->push_back( s1 );
+    containerObj->derivedObjs->push_back( s2 );
 
-    auto allObjects = containerObj->derivedObjs.objects();
+    auto allObjects = *containerObj->derivedObjs;
 
     auto it =
         std::find_if( allObjects.begin(), allObjects.end(), []( auto objectPtr ) { return objectPtr->id.value() == 2; } );
@@ -119,13 +116,13 @@ TEST( ChildArrayFieldHandle, DerivedOtherObjects )
     auto s1 = std::make_shared<SimpleObjDerivedOther>();
     auto s2 = std::make_shared<SimpleObjDerivedOther>();
 
-    int s2Id = s2->id;
+    int s2Id = *s2->id;
 
-    containerObj->derivedOtherObjs.push_back( s0 );
-    containerObj->derivedOtherObjs.push_back( s1 );
-    containerObj->derivedOtherObjs.push_back( s2 );
+    containerObj->derivedOtherObjs->push_back( s0 );
+    containerObj->derivedOtherObjs->push_back( s1 );
+    containerObj->derivedOtherObjs->push_back( s2 );
 
-    auto allObjects = containerObj->derivedOtherObjs.objects();
+    auto allObjects = *containerObj->derivedOtherObjs;
 
     auto it = std::find_if( allObjects.begin(),
                             allObjects.end(),
@@ -135,9 +132,10 @@ TEST( ChildArrayFieldHandle, DerivedOtherObjects )
 
     EXPECT_EQ( s2, myObj );
 
-    containerObj->derivedOtherObjs.removeChildObject( myObj );
+    containerObj->derivedOtherObjs->erase(
+        std::find( containerObj->derivedOtherObjs->begin(), containerObj->derivedOtherObjs->end(), myObj ) );
 
-    allObjects = containerObj->derivedOtherObjs.objects();
+    allObjects = *containerObj->derivedOtherObjs;
 
     it = std::find_if( allObjects.begin(),
                        allObjects.end(),

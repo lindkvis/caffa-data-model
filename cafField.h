@@ -21,97 +21,118 @@
 // ##################################################################################################
 #pragma once
 
-#include "cafDataField.h"
+#include "cafFieldHandle.h"
 #include "cafFieldValidator.h"
+#include "cafPortableDataType.h"
+#include "cafValueProxy.h"
 
 #include "cafAssert.h"
-#include "cafDataFieldAccessor.h"
 
 #include "cafLogger.h"
 
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
 namespace caffa
 {
-class ObjectHandle;
-
-//==================================================================================================
-/// Field class encapsulating data with input and output of this data
-/// read/write-FieldData is supposed to be specialized for types needing specialization
-//==================================================================================================
 
 template <typename DataType>
-class Field : public TypedField<DataType>
+class DereferenceHelper
 {
 public:
-    typedef DataFieldAccessor<DataType>              DataAccessor;
-    typedef DataFieldDirectStorageAccessor<DataType> DirectStorageAccessor;
+    using FieldType   = DataType;
+    using ContentType = DataType;
 
+    static const ContentType& dereference( const DataType& data ) { return data; }
+    static const ContentType* pointer( const DataType& data ) { return &data; }
+
+    static ContentType& dereference( DataType& data ) { return data; }
+    static ContentType* pointer( DataType& data ) { return &data; }
+};
+
+template <typename DataType>
+class DereferenceHelper<std::shared_ptr<DataType>>
+{
+public:
+    using FieldType   = std::shared_ptr<DataType>;
+    using ContentType = DataType;
+
+    static const ContentType& dereference( const std::shared_ptr<DataType>& data ) { return *data; }
+    static const ContentType* pointer( const std::shared_ptr<DataType>& data ) { return data.get(); }
+
+    static ContentType& dereference( std::shared_ptr<DataType>& data ) { return *data; }
+    static ContentType* pointer( std::shared_ptr<DataType>& data ) { return data.get(); }
+};
+
+/**
+ * Typed field class.
+ */
+template <typename DataType>
+class Field : public FieldHandle
+{
+public:
+    using FieldType   = DereferenceHelper<DataType>::FieldType;
+    using ContentType = DereferenceHelper<DataType>::ContentType;
+    /**
+     * Main constructor with default initialisation of the value
+     */
     Field()
-        : m_fieldDataAccessor( std::make_unique<DirectStorageAccessor>() )
+        : m_value{}
     {
     }
 
-    explicit Field( const Field& other ) = delete;
-
-    explicit Field( const DataType& fieldValue )
-        : m_fieldDataAccessor( std::make_unique<DirectStorageAccessor>( fieldValue ) )
-    {
-    }
-
-    Field( std::unique_ptr<DataAccessor> accessor )
-        : m_fieldDataAccessor( std::move( accessor ) )
-    {
-    }
+    explicit Field( const Field& other )         = delete;
+    explicit Field( const DataType& fieldValue ) = delete;
 
     ~Field() noexcept override {}
 
-    // Assignment
+    /**
+     * Get a portable string representation of the data type
+     * @return a data type name represented as a string
+     */
+    std::string dataType() const override { return PortableDataType<DataType>::name(); }
 
-    Field& operator=( const Field& other ) = delete;
+    /**
+     * Assignment of field value from another field
+     * @param other The other field
+     * @return this
+     */
+    Field& operator=( const Field& other )
+    {
+        this->setValue( other.m_value );
+        return *this;
+    }
 
+    /**
+     * Assignment of field value from another value
+     * @param other The new value
+     * @return this
+     */
     Field& operator=( const DataType& fieldValue )
     {
         this->setValue( fieldValue );
         return *this;
     }
 
-    // Basic access
-
-    DataType value() const override
+    /**
+     * Returns the value of the field *BY VALUE*
+     * @return the value of the field
+     */
+    DataType value()
     {
         CAFFA_ASSERT( this->isInitialized() );
-
-        if ( !m_fieldDataAccessor )
-        {
-            std::string errorMessage = "Failed to get value for '" + this->keyword() + "': Field is not accessible";
-            CAFFA_ERROR( errorMessage );
-            throw std::runtime_error( errorMessage );
-        }
-
-        try
-        {
-            return m_fieldDataAccessor->value();
-        }
-        catch ( const std::exception& e )
-        {
-            std::string errorMessage = "Failed to get value for '" + this->keyword() + "': " + e.what();
-            CAFFA_ERROR( errorMessage );
-            throw std::runtime_error( errorMessage );
-        }
+        return m_value;
     }
 
-    void setValue( const DataType& fieldValue ) override
+    /**
+     * Assign a new value and check the validators
+     * @param fieldValue the new value
+     * @throws Throws std::runtime_error if a validation failed.
+     */
+    void setValue( const DataType& fieldValue )
     {
         CAFFA_ASSERT( this->isInitialized() );
-
-        if ( !m_fieldDataAccessor )
-        {
-            std::string errorMessage = "Failed to set value for '" + this->keyword() + "': Field is not accessible";
-            CAFFA_ERROR( errorMessage );
-            throw std::runtime_error( errorMessage );
-        }
 
         try
         {
@@ -131,7 +152,7 @@ public:
                     }
                 }
             }
-            m_fieldDataAccessor->setValue( fieldValue );
+            m_value = fieldValue;
         }
         catch ( const std::exception& e )
         {
@@ -141,34 +162,19 @@ public:
         }
     }
 
-    // Access operators
+    operator ContentType&() { return DereferenceHelper<DataType>::dereference( m_value ); }
 
-    /*Conversion */
-    operator DataType() const { return this->value(); }
-    DataType operator()() const { return this->value(); }
-    DataType operator*() const { return this->value(); }
+    operator const ContentType&() const { return DereferenceHelper<DataType>::dereference( m_value ); }
 
-    auto operator<=>( const DataType& fieldValue ) const { return this->value() <=> fieldValue; }
+    const ContentType& operator*() const { return DereferenceHelper<DataType>::dereference( m_value ); }
 
-    bool isReadable() const override { return m_fieldDataAccessor != nullptr && m_fieldDataAccessor->hasGetter(); }
-    bool isWritable() const override { return m_fieldDataAccessor != nullptr && m_fieldDataAccessor->hasSetter(); }
+    ContentType& operator*() { return DereferenceHelper<DataType>::dereference( m_value ); }
 
-    // Replace accessor
-    void setAccessor( std::unique_ptr<DataAccessor> accessor ) { m_fieldDataAccessor = std::move( accessor ); }
+    const ContentType* operator->() const { return DereferenceHelper<DataType>::pointer( m_value ); }
 
-    void setUntypedAccessor( std::unique_ptr<DataFieldAccessorInterface> accessor ) override
-    {
-        if ( accessor )
-        {
-            std::unique_ptr<DataAccessor> typedAccessor( dynamic_cast<DataAccessor*>( accessor.release() ) );
-            CAFFA_ASSERT( typedAccessor );
-            setAccessor( std::move( typedAccessor ) );
-        }
-        else
-        {
-            setAccessor( nullptr );
-        }
-    }
+    ContentType* operator->() { return DereferenceHelper<DataType>::pointer( m_value ); }
+
+    auto operator<=>( const DataType& fieldValue ) const { return m_value <=> fieldValue; }
 
     std::vector<const FieldValidator<DataType>*> valueValidators() const
     {
@@ -193,21 +199,22 @@ public:
     void addValidator( std::unique_ptr<FieldValidator<DataType>> valueValidator )
     {
         m_valueValidators.push_back( std::move( valueValidator ) );
+        setValue( m_value );
     }
 
     void clearValidators() { m_valueValidators.clear(); }
 
 public:
-    std::optional<DataType> defaultValue() const { return m_defaultValue; }
-    void                    setDefaultValue( const DataType& val ) { m_defaultValue = val; }
+    std::optional<FieldType> defaultValue() const { return m_defaultValue; }
+    void                     setDefaultValue( const FieldType& val ) { m_defaultValue = val; }
 
     bool operator==( const Field<DataType>& rhs ) const  = delete;
     auto operator<=>( const Field<DataType>& rhs ) const = delete;
 
-protected:
-    std::unique_ptr<DataAccessor>                          m_fieldDataAccessor;
+private:
+    DataType                                               m_value;
+    std::optional<FieldType>                               m_defaultValue;
     std::vector<std::unique_ptr<FieldValidator<DataType>>> m_valueValidators;
-    std::optional<DataType>                                m_defaultValue;
 };
 
 } // End of namespace caffa

@@ -21,8 +21,6 @@
 
 namespace caffa
 {
-class ChildFieldBaseHandle;
-class DataField;
 class FieldHandle;
 class ObjectHandle;
 
@@ -33,8 +31,7 @@ class Inspector
 {
 public:
     void visit( const ObjectHandle* object );
-    void visit( const ChildFieldBaseHandle* field );
-    void visit( const DataField* field );
+    void visit( const FieldHandle* field );
 
 private:
     virtual void visitObject( const ObjectHandle* object ) = 0;
@@ -50,8 +47,7 @@ class Editor
 {
 public:
     void visit( ObjectHandle* object );
-    void visit( ChildFieldBaseHandle* field );
-    void visit( DataField* field );
+    void visit( FieldHandle* field );
 
 private:
     virtual void visitObject( ObjectHandle* object ) = 0;

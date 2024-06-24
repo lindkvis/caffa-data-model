@@ -90,4 +90,14 @@ const std::string& FieldHandle::documentation() const
     return m_documentation;
 }
 
+void FieldHandle::accept( Inspector* visitor ) const
+{
+    visitor->visit( this );
+}
+
+void FieldHandle::accept( Editor* editor )
+{
+    editor->visit( this );
+}
+
 } // End of namespace caffa

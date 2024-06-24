@@ -1,16 +1,15 @@
 
 #include "gtest/gtest.h"
 
+#include "Child.h"
 #include "Parent.h"
 
-#include "cafChildArrayField.h"
-#include "cafChildField.h"
 #include "cafField.h"
-#include "cafFieldProxyAccessor.h"
 #include "cafObjectHandle.h"
 #include "cafObjectMacros.h"
 
 #include "cafPortableDataType.h"
+#include "cafValueProxy.h"
 
 #include <functional>
 #include <map>
@@ -30,22 +29,17 @@ public:
     DemoObject()
     {
         addField( &m_proxyDoubleField, "m_proxyDoubleField" );
-        auto doubleProxyAccessor = std::make_unique<caffa::FieldProxyAccessor<double>>();
-        doubleProxyAccessor->registerSetMethod( std::bind( &DemoObject::setDoubleMember, this, _1 ) );
-        doubleProxyAccessor->registerGetMethod( std::bind( &DemoObject::doubleMember, this ) );
-        m_proxyDoubleField.setAccessor( std::move( doubleProxyAccessor ) );
+
+        m_proxyDoubleField->registerSetMethod( std::bind( &DemoObject::setDoubleMember, this, _1 ) );
+        m_proxyDoubleField->registerGetMethod( std::bind( &DemoObject::doubleMember, this ) );
 
         addField( &m_proxyIntField, "m_proxyIntField" );
-        auto intProxyAccessor = std::make_unique<caffa::FieldProxyAccessor<int>>();
-        intProxyAccessor->registerSetMethod( std::bind( &DemoObject::setIntMember, this, _1 ) );
-        intProxyAccessor->registerGetMethod( std::bind( &DemoObject::intMember, this ) );
-        m_proxyIntField.setAccessor( std::move( intProxyAccessor ) );
+        m_proxyIntField->registerSetMethod( std::bind( &DemoObject::setIntMember, this, _1 ) );
+        m_proxyIntField->registerGetMethod( std::bind( &DemoObject::intMember, this ) );
 
         addField( &m_proxyStringField, "m_proxyStringField" );
-        auto stringProxyAccessor = std::make_unique<caffa::FieldProxyAccessor<std::string>>();
-        stringProxyAccessor->registerSetMethod( std::bind( &DemoObject::setStringMember, this, _1 ) );
-        stringProxyAccessor->registerGetMethod( std::bind( &DemoObject::stringMember, this ) );
-        m_proxyStringField.setAccessor( std::move( stringProxyAccessor ) );
+        m_proxyStringField->registerSetMethod( std::bind( &DemoObject::setStringMember, this, _1 ) );
+        m_proxyStringField->registerGetMethod( std::bind( &DemoObject::stringMember, this ) );
 
         addField( &m_memberDoubleField, "m_memberDoubleField" );
         addField( &m_memberIntField, "m_memberIntField" );
@@ -62,9 +56,9 @@ public:
     }
 
     // Fields
-    caffa::Field<double>      m_proxyDoubleField;
-    caffa::Field<int>         m_proxyIntField;
-    caffa::Field<std::string> m_proxyStringField;
+    caffa::Field<caffa::ValueProxy<double>>      m_proxyDoubleField;
+    caffa::Field<caffa::ValueProxy<int>>         m_proxyIntField;
+    caffa::Field<caffa::ValueProxy<std::string>> m_proxyStringField;
 
     caffa::Field<double>      m_memberDoubleField;
     caffa::Field<int>         m_memberIntField;
@@ -107,8 +101,8 @@ public:
         addField( &m_childArrayField, "DemoObjectects" );
     }
 
-    caffa::Field<std::string>           m_texts;
-    caffa::ChildArrayField<DemoObject*> m_childArrayField;
+    caffa::Field<std::string>                              m_texts;
+    caffa::Field<std::vector<std::shared_ptr<DemoObject>>> m_childArrayField;
 };
 
 TEST( DataModelTest, Delete )
@@ -150,9 +144,9 @@ TEST( DataModelTest, TestField )
     ASSERT_DOUBLE_EQ( 1.2, a->m_memberDoubleField.value() );
 
     // Simpler access
-    ASSERT_DOUBLE_EQ( 1.2, a->m_memberDoubleField );
+    ASSERT_DOUBLE_EQ( 1.2, *a->m_memberDoubleField );
     a->m_memberDoubleField = 42.0;
-    ASSERT_DOUBLE_EQ( 42.0, a->m_memberDoubleField );
+    ASSERT_DOUBLE_EQ( 42.0, *a->m_memberDoubleField );
     ASSERT_EQ( 0, *a->m_memberIntField );
     ASSERT_NO_THROW( a->m_memberIntField = 1000 );
     ASSERT_NO_THROW( a->m_memberIntField = -10 );
@@ -171,17 +165,17 @@ TEST( DataModelTest, TestProxyTypedField )
 {
     auto a = std::make_shared<DemoObject>();
 
-    ASSERT_DOUBLE_EQ( 2.1, a->m_proxyDoubleField.value() );
-    a->m_proxyDoubleField.setValue( 1.2 );
-    ASSERT_DOUBLE_EQ( 1.2, a->m_proxyDoubleField.value() );
+    ASSERT_DOUBLE_EQ( 2.1, a->m_proxyDoubleField->value() );
+    a->m_proxyDoubleField->setValue( 1.2 );
+    ASSERT_DOUBLE_EQ( 1.2, a->m_proxyDoubleField->value() );
 
-    ASSERT_EQ( 7, a->m_proxyIntField.value() );
-    a->m_proxyIntField.setValue( 11 );
-    ASSERT_EQ( 11, a->m_proxyIntField.value() );
+    ASSERT_EQ( 7, a->m_proxyIntField->value() );
+    a->m_proxyIntField->setValue( 11 );
+    ASSERT_EQ( 11, a->m_proxyIntField->value() );
 
-    ASSERT_TRUE( a->m_proxyStringField.value() == "abba" );
-    a->m_proxyStringField.setValue( "123" );
-    ASSERT_TRUE( a->m_proxyStringField.value() == "123" );
+    ASSERT_TRUE( a->m_proxyStringField->value() == "abba" );
+    a->m_proxyStringField->setValue( "123" );
+    ASSERT_TRUE( a->m_proxyStringField->value() == "123" );
 }
 
 class A : public caffa::ObjectHandle
@@ -198,7 +192,7 @@ public:
         addField( &field3, "field3" );
 
         field2 = testValue;
-        field3 = field2();
+        field3 = field2;
     }
 
     caffa::Field<std::vector<double>> field1;
@@ -227,24 +221,24 @@ TEST( DataModelTest, NormalField )
 
     A a( testValue );
 
-    EXPECT_EQ( 1.3, a.field2.value()[2] );
-    EXPECT_EQ( 1.3, a.field3.value()[2] );
-    EXPECT_EQ( size_t( 0 ), a.field1().size() );
+    EXPECT_EQ( 1.3, a.field2->at( 2 ) );
+    EXPECT_EQ( 1.3, a.field3->at( 2 ) );
+    EXPECT_EQ( size_t( 0 ), a.field1->size() );
 
     // Operators
     // ==
-    EXPECT_FALSE( a.field1() == a.field3() );
+    EXPECT_FALSE( *a.field1 == *a.field3 );
     // = field to field
-    a.field1 = a.field2();
-    // ()
-    EXPECT_EQ( 1.3, a.field1()[2] );
+    a.field1 = a.field2;
+    // value()
+    EXPECT_EQ( 1.3, a.field1.value()[2] );
     // = value to field
     a.field1 = testValue2;
-    // v()
-    EXPECT_EQ( 2.3, a.field1.value()[2] );
-    // ==
-    a.field3 = a.field1();
-    EXPECT_TRUE( a.field1() == a.field3() );
+    // *v
+    EXPECT_EQ( 2.3, ( *a.field1 )[2] );
+    // = with dereference
+    a.field3 = *a.field1;
+    EXPECT_TRUE( a.field1.value() == a.field3.value() );
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -264,84 +258,93 @@ TEST( DataModelTest, ChildArrayField )
     std::weak_ptr<DemoObject> s3p = s3;
 
     // empty() number 1
-    EXPECT_TRUE( ihd1->m_childArrayField.empty() );
-    EXPECT_EQ( size_t( 0 ), ihd1->m_childArrayField.size() );
+    EXPECT_TRUE( ihd1->m_childArrayField->empty() );
+    EXPECT_EQ( size_t( 0 ), ihd1->m_childArrayField->size() );
 
-    ihd1->m_childArrayField.push_back( s1 );
-    ihd1->m_childArrayField.push_back( s2 );
-    ihd1->m_childArrayField.push_back( s3 );
+    ihd1->m_childArrayField->push_back( s1 );
+    ihd1->m_childArrayField->push_back( s2 );
+    ihd1->m_childArrayField->push_back( s3 );
 
     EXPECT_EQ( 2, s1.use_count() );
     EXPECT_EQ( 2, s2.use_count() );
     EXPECT_EQ( 2, s3.use_count() );
 
     // size()
-    EXPECT_EQ( size_t( 3 ), ihd1->m_childArrayField.size() );
+    EXPECT_EQ( size_t( 3 ), ihd1->m_childArrayField->size() );
 
     // operator[]
-    EXPECT_EQ( s1, ihd1->m_childArrayField[0] );
-    EXPECT_EQ( s2, ihd1->m_childArrayField[1] );
-    EXPECT_EQ( s3, ihd1->m_childArrayField[2] );
+    EXPECT_EQ( s1, ihd1->m_childArrayField->at( 0 ) );
+    EXPECT_EQ( s2, ihd1->m_childArrayField->at( 1 ) );
+    EXPECT_EQ( s3, ihd1->m_childArrayField->at( 2 ) );
 
-    // childObjects
-    auto objects = ihd1->m_childArrayField.childObjects();
-    EXPECT_EQ( size_t( 3 ), objects.size() );
-    EXPECT_EQ( 3, s1.use_count() );
-    EXPECT_EQ( 3, s2.use_count() );
-    EXPECT_EQ( 3, s3.use_count() );
-    objects.clear();
+    // children by reference
+    {
+        auto& objects = *ihd1->m_childArrayField;
+        EXPECT_EQ( size_t( 3 ), objects.size() );
+        EXPECT_EQ( 2, s1.use_count() );
+        EXPECT_EQ( 2, s2.use_count() );
+        EXPECT_EQ( 2, s3.use_count() );
+    }
+
+    // children by value
+    {
+        auto objects = ihd1->m_childArrayField.value();
+        EXPECT_EQ( size_t( 3 ), objects.size() );
+        EXPECT_EQ( 3, s1.use_count() );
+        EXPECT_EQ( 3, s2.use_count() );
+        EXPECT_EQ( 3, s3.use_count() );
+    }
+
     EXPECT_EQ( 2, s1.use_count() );
     EXPECT_EQ( 2, s2.use_count() );
     EXPECT_EQ( 2, s3.use_count() );
 
-    auto typedObjects = ihd1->m_childArrayField.objects();
-    EXPECT_EQ( size_t( 3 ), typedObjects.size() );
-    EXPECT_EQ( 3, s1.use_count() );
-    EXPECT_EQ( 3, s2.use_count() );
-    EXPECT_EQ( 3, s3.use_count() );
-    typedObjects.clear();
-
     // remove child object
-    ihd1->m_childArrayField.removeChildObject( s2 );
-    EXPECT_EQ( size_t( 2 ), ihd1->m_childArrayField.size() );
+    ihd1->m_childArrayField->erase( std::find( ihd1->m_childArrayField->begin(), ihd1->m_childArrayField->end(), s2 ) );
+    EXPECT_EQ( size_t( 2 ), ihd1->m_childArrayField->size() );
     EXPECT_EQ( 2, s1.use_count() );
     EXPECT_EQ( 1, s2.use_count() );
     EXPECT_EQ( 2, s3.use_count() );
 
-    ihd1->m_childArrayField.removeChildObject( nullptr );
+    auto it = std::find( ihd1->m_childArrayField->begin(), ihd1->m_childArrayField->end(), nullptr );
+    ASSERT_TRUE( it == ihd1->m_childArrayField->end() );
 
-    EXPECT_EQ( s3, ihd1->m_childArrayField[1] );
-    EXPECT_EQ( s1, ihd1->m_childArrayField[0] );
+    ihd1->m_childArrayField->erase( it, ihd1->m_childArrayField->end() );
+    EXPECT_EQ( size_t( 2 ), ihd1->m_childArrayField->size() );
+
+    EXPECT_EQ( s3, ihd1->m_childArrayField->at( 1 ) );
+    EXPECT_EQ( s1, ihd1->m_childArrayField->at( 0 ) );
 
     // insertAt()
-    ihd1->m_childArrayField.insertAt( 1, s2 );
-    EXPECT_EQ( s1, ihd1->m_childArrayField[0] );
-    EXPECT_EQ( s2, ihd1->m_childArrayField[1] );
-    EXPECT_EQ( s3, ihd1->m_childArrayField[2] );
+    ihd1->m_childArrayField->insert( ihd1->m_childArrayField->begin() + 1, s2 );
+    EXPECT_EQ( size_t( 3 ), ihd1->m_childArrayField->size() );
+    EXPECT_EQ( s1, ihd1->m_childArrayField->at( 0 ) );
+    EXPECT_EQ( s2, ihd1->m_childArrayField->at( 1 ) );
+    EXPECT_EQ( s3, ihd1->m_childArrayField->at( 2 ) );
 
     // erase (index)
-    EXPECT_EQ( size_t( 3 ), ihd1->m_childArrayField.size() );
-    ihd1->m_childArrayField.erase( 1 );
+    EXPECT_EQ( size_t( 3 ), ihd1->m_childArrayField->size() );
+    ihd1->m_childArrayField->erase( ihd1->m_childArrayField->begin() + 1 );
     EXPECT_TRUE( s2 );
-    EXPECT_EQ( size_t( 2 ), ihd1->m_childArrayField.size() );
-    EXPECT_EQ( s3, ihd1->m_childArrayField[1] );
-    EXPECT_EQ( s1, ihd1->m_childArrayField[0] );
+    EXPECT_EQ( size_t( 2 ), ihd1->m_childArrayField->size() );
+    EXPECT_EQ( s3, ihd1->m_childArrayField->at( 1 ) );
+    EXPECT_EQ( s1, ihd1->m_childArrayField->at( 0 ) );
 
     // clear()
-    auto extractedObjects = ihd1->m_childArrayField.objects();
+    auto extractedObjects = ihd1->m_childArrayField.value();
 
     EXPECT_EQ( 3, s1.use_count() );
     EXPECT_EQ( 1, s2.use_count() );
     EXPECT_EQ( 3, s3.use_count() );
 
-    ihd1->m_childArrayField.clear();
+    ihd1->m_childArrayField->clear();
 
     EXPECT_EQ( size_t( 2 ), extractedObjects.size() );
-    EXPECT_EQ( size_t( 0 ), ihd1->m_childArrayField.size() );
+    EXPECT_EQ( size_t( 0 ), ihd1->m_childArrayField->size() );
 
     for ( auto& object : extractedObjects )
     {
-        ihd1->m_childArrayField.push_back_obj( object );
+        ihd1->m_childArrayField->push_back( object );
     }
 
     s1.reset();
@@ -352,7 +355,7 @@ TEST( DataModelTest, ChildArrayField )
     EXPECT_TRUE( s2 == nullptr );
     EXPECT_TRUE( s3 == nullptr );
 
-    EXPECT_EQ( size_t( 2 ), ihd1->m_childArrayField.size() );
+    EXPECT_EQ( size_t( 2 ), ihd1->m_childArrayField->size() );
     EXPECT_FALSE( s1p.expired() );
     EXPECT_TRUE( s2p.expired() );
     EXPECT_FALSE( s3p.expired() );
@@ -362,8 +365,8 @@ TEST( DataModelTest, ChildArrayField )
     EXPECT_TRUE( s2p.expired() );
     EXPECT_FALSE( s3p.expired() );
 
-    ihd1->m_childArrayField.clear();
-    EXPECT_EQ( size_t( 0 ), ihd1->m_childArrayField.size() );
+    ihd1->m_childArrayField->clear();
+    EXPECT_EQ( size_t( 0 ), ihd1->m_childArrayField->size() );
     EXPECT_TRUE( s1p.expired() );
     EXPECT_TRUE( s2p.expired() );
     EXPECT_TRUE( s3p.expired() );
@@ -376,8 +379,6 @@ TEST( DataModelTest, ChildArrayParentField )
 
     delete parentObj;
 }
-
-#include "Child.h"
 
 TEST( DataModelTest, PointersFieldInsertVector )
 {
@@ -392,56 +393,13 @@ TEST( DataModelTest, PointersFieldInsertVector )
     typedObjects.push_back( s2 );
     typedObjects.push_back( s3 );
 
-    ihd1->m_simpleObjectsField.push_back( std::make_shared<Child>() );
+    ihd1->m_simpleObjectVectorField->push_back( std::make_shared<Child>() );
     for ( auto& typedObject : typedObjects )
     {
-        ihd1->m_simpleObjectsField.push_back( typedObject );
+        ihd1->m_simpleObjectVectorField->push_back( typedObject );
     }
-    EXPECT_EQ( size_t( 4 ), ihd1->m_simpleObjectsField.size() );
-    EXPECT_EQ( ihd1->m_simpleObjectsField[3], s3 );
-}
-
-//--------------------------------------------------------------------------------------------------
-/// ChildArrayFieldHandle
-//--------------------------------------------------------------------------------------------------
-TEST( DataModelTest, ChildArrayFieldHandle )
-{
-    auto s0                 = std::make_shared<DemoObject>();
-    s0->m_memberDoubleField = 1000;
-
-    auto s1                 = std::make_shared<DemoObject>();
-    s1->m_memberDoubleField = 1000;
-
-    auto s2                 = std::make_shared<DemoObject>();
-    s2->m_memberDoubleField = 2000;
-
-    auto s3                 = std::make_shared<DemoObject>();
-    s3->m_memberDoubleField = 3000;
-
-    auto                          ihd1      = std::make_shared<InheritedDemoObj>();
-    caffa::ChildArrayFieldHandle* listField = &( ihd1->m_childArrayField );
-
-    EXPECT_EQ( 0u, listField->size() );
-    EXPECT_TRUE( listField->empty() );
-
-    listField->insertAt( 0u, s0 );
-    EXPECT_EQ( 1u, listField->size() );
-    EXPECT_FALSE( listField->empty() );
-
-    ihd1->m_childArrayField.push_back( s1 );
-    ihd1->m_childArrayField.push_back( s2 );
-    ihd1->m_childArrayField.push_back( s3 );
-
-    EXPECT_EQ( 4u, listField->size() );
-    EXPECT_FALSE( listField->empty() );
-
-    listField->erase( 0 );
-    EXPECT_EQ( 3u, listField->size() );
-    EXPECT_FALSE( listField->empty() );
-
-    listField->clear();
-    EXPECT_EQ( 0u, listField->size() );
-    EXPECT_TRUE( listField->empty() );
+    EXPECT_EQ( size_t( 4 ), ihd1->m_simpleObjectVectorField->size() );
+    EXPECT_EQ( ihd1->m_simpleObjectVectorField->at( 3 ), s3 );
 }
 
 class A2 : public caffa::ObjectHandle
@@ -455,8 +413,8 @@ public:
         addField( &field2, "field2" );
     }
 
-    caffa::ChildField<Child*> field2;
-    int                       b;
+    caffa::Field<std::shared_ptr<Child>> field2;
+    int                                  b;
 };
 
 CAFFA_SOURCE_INIT( A2 )
@@ -467,33 +425,30 @@ CAFFA_SOURCE_INIT( A2 )
 TEST( DataModelTest, ChildField )
 {
     {
-        std::weak_ptr<Child> weapPtr;
+        std::weak_ptr<Child> weakPtr;
 
         {
             auto testValue = std::make_shared<Child>();
-            weapPtr        = testValue;
-            EXPECT_FALSE( weapPtr.expired() );
+            weakPtr        = testValue;
+            EXPECT_FALSE( weakPtr.expired() );
 
             A2 a;
             a.field2 = testValue;
-            EXPECT_EQ( a.field2, weapPtr.lock() );
+            EXPECT_EQ( a.field2.value(), weakPtr.lock() );
         }
         // Guarded
-        EXPECT_TRUE( weapPtr.expired() );
+        EXPECT_TRUE( weakPtr.expired() );
     }
     {
         A2   a;
         auto c2 = std::make_shared<Child>();
         // Assign
-        a.field2.setObject( c2 );
-        // Access
-        EXPECT_EQ( c2, a.field2 );
-        EXPECT_EQ( c2, a.field2.object() );
-        EXPECT_TRUE( c2 == a.field2 );
+        a.field2 = c2;
 
-        std::vector<std::shared_ptr<caffa::ObjectHandle>> objects = a.field2.childObjects();
-        EXPECT_EQ( (size_t)1, objects.size() );
-        EXPECT_EQ( c2, objects[0] );
+        a.field2->doSomething();
+        // Access
+        EXPECT_EQ( c2, a.field2.value() );
+        EXPECT_TRUE( c2 == a.field2.value() );
     }
 }
 
