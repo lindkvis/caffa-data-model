@@ -18,7 +18,6 @@
 // ##################################################################################################
 #pragma once
 
-#include "cafChildFieldHandle.h"
 #include "cafObjectHandle.h"
 #include "cafVisitor.h"
 

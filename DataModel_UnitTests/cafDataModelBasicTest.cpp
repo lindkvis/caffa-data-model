@@ -5,9 +5,9 @@
 #include "Parent.h"
 
 #include "cafField.h"
+#include "cafObjectCollector.h"
 #include "cafObjectHandle.h"
 #include "cafObjectMacros.h"
-
 #include "cafPortableDataType.h"
 #include "cafValueProxy.h"
 
@@ -324,12 +324,24 @@ TEST( DataModelTest, ChildArrayField )
 
     // erase (index)
     EXPECT_EQ( size_t( 3 ), ihd1->m_childArrayField->size() );
+
+    {
+        caffa::ObjectCollector collector;
+        collector.visit( ihd1.get() );
+        ASSERT_EQ( size_t( 4 ), collector.objects().size() );
+    }
+
     ihd1->m_childArrayField->erase( ihd1->m_childArrayField->begin() + 1 );
     EXPECT_TRUE( s2 );
     EXPECT_EQ( size_t( 2 ), ihd1->m_childArrayField->size() );
     EXPECT_EQ( s3, ihd1->m_childArrayField->at( 1 ) );
     EXPECT_EQ( s1, ihd1->m_childArrayField->at( 0 ) );
 
+    {
+        caffa::ObjectCollector collector;
+        collector.visit( ihd1.get() );
+        ASSERT_EQ( size_t( 3 ), collector.objects().size() );
+    }
     // clear()
     auto extractedObjects = ihd1->m_childArrayField.value();
 
@@ -400,6 +412,14 @@ TEST( DataModelTest, PointersFieldInsertVector )
     }
     EXPECT_EQ( size_t( 4 ), ihd1->m_simpleObjectVectorField->size() );
     EXPECT_EQ( ihd1->m_simpleObjectVectorField->at( 3 ), s3 );
+
+    ihd1->m_simpleObjectField = std::make_shared<Child>();
+
+    {
+        caffa::ObjectCollector collector;
+        collector.visit( ihd1.get() );
+        ASSERT_EQ( size_t( 6 ), collector.objects().size() );
+    }
 }
 
 class A2 : public caffa::ObjectHandle

@@ -36,8 +36,8 @@ public:
     template <typename CapabilityType>
     const CapabilityType* capability() const;
 
-    void accept( Inspector* visitor ) const;
-    void accept( Editor* editor );
+    virtual void accept( Inspector* visitor ) const = 0;
+    virtual void accept( Editor* editor )           = 0;
 
     bool isDeprecated() const;
     void markDeprecated();
