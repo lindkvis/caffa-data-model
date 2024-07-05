@@ -29,6 +29,7 @@
 
 #include "cafLogger.h"
 
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -60,7 +61,7 @@ public:
     {
     }
 
-    Field( std::unique_ptr<DataAccessor> accessor )
+    explicit Field( std::unique_ptr<DataAccessor> accessor )
         : m_fieldDataAccessor( std::move( accessor ) )
     {
     }
@@ -145,6 +146,7 @@ public:
 
     /*Conversion */
     operator DataType() const { return this->value(); }
+
     DataType operator()() const { return this->value(); }
     DataType operator*() const { return this->value(); }
 

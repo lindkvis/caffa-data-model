@@ -18,6 +18,7 @@
 //
 #include "cafChildArrayFieldAccessor.h"
 
+#include "../../units/include/units.h"
 #include "cafAssert.h"
 #include "cafFieldHandle.h"
 #include "cafObjectHandle.h"
@@ -80,9 +81,7 @@ void ChildArrayFieldDirectStorageAccessor::push_back( std::shared_ptr<ObjectHand
 
 size_t ChildArrayFieldDirectStorageAccessor::index( std::shared_ptr<const ObjectHandle> object ) const
 {
-    auto it = std::find_if( m_pointers.begin(),
-                            m_pointers.end(),
-                            [object]( const auto& ptr ) { return ptr.get() == object.get(); } );
+    auto it = std::ranges::find_if( m_pointers, [object]( const auto& ptr ) { return ptr.get() == object.get(); } );
     if ( it == m_pointers.end() )
     {
         return std::numeric_limits<size_t>::infinity();

@@ -32,7 +32,9 @@ class Session;
 class MethodAccessorInterface
 {
 public:
-    MethodAccessorInterface( const ObjectHandle* selfHandle, const MethodHandle* methodHandle, ObjectFactory* objectFactory )
+    MethodAccessorInterface( const ObjectHandle*                   selfHandle,
+                             const MethodHandle*                   methodHandle,
+                             const std::shared_ptr<ObjectFactory>& objectFactory )
         : m_selfHandle( selfHandle )
         , m_methodHandle( methodHandle )
         , m_objectFactory( objectFactory )
@@ -41,19 +43,19 @@ public:
     virtual ~MethodAccessorInterface()                                     = default;
     virtual std::string execute( const std::string& argumentString ) const = 0;
 
-    ObjectFactory* objectFactory() const { return m_objectFactory; }
+    std::shared_ptr<ObjectFactory> objectFactory() const { return m_objectFactory.lock(); }
 
 protected:
-    const ObjectHandle* m_selfHandle;
-    const MethodHandle* m_methodHandle;
-    ObjectFactory*      m_objectFactory;
+    const ObjectHandle*          m_selfHandle;
+    const MethodHandle*          m_methodHandle;
+    std::weak_ptr<ObjectFactory> m_objectFactory;
 };
 
 class MethodHandle
 {
 public:
-    MethodHandle()  = default;
-    ~MethodHandle() = default;
+    MethodHandle()          = default;
+    virtual ~MethodHandle() = default;
 
     std::string keyword() const { return m_name; }
     void        setArgumentNames( const std::vector<std::string>& argumentNames ) { m_argumentNames = argumentNames; }

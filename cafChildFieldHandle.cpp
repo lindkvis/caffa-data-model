@@ -19,7 +19,6 @@
 // ##################################################################################################
 #include "cafChildFieldHandle.h"
 
-#include "cafObjectHandle.h"
 #include "cafVisitor.h"
 
 using namespace caffa;

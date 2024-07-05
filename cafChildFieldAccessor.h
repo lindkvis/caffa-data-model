@@ -21,7 +21,6 @@
 #include "cafObjectHandle.h"
 
 #include <memory>
-#include <optional>
 
 namespace caffa
 {
@@ -30,7 +29,7 @@ class FieldHandle;
 class ChildFieldAccessor
 {
 public:
-    ChildFieldAccessor( FieldHandle* field )
+    explicit ChildFieldAccessor( FieldHandle* field )
         : m_field( field )
     {
     }

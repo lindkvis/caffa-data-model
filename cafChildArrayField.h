@@ -21,7 +21,6 @@
 // ##################################################################################################
 #pragma once
 
-#include "cafAssert.h"
 #include "cafChildArrayFieldAccessor.h"
 #include "cafChildArrayFieldHandle.h"
 #include "cafObjectHandle.h"
@@ -37,11 +36,11 @@ namespace caffa
  * The ChildArrayField will take over ownership of any object assigned to it.
  */
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
-class ChildArrayField : public ChildArrayFieldHandle
+requires is_pointer<DataTypePtr>
+class ChildArrayField final : public ChildArrayFieldHandle
 {
 public:
-    using DataType = typename std::remove_pointer<DataTypePtr>::type;
+    using DataType = std::remove_pointer_t<DataTypePtr>;
 
     using Ptr           = std::shared_ptr<DataType>;
     using ConstPtr      = std::shared_ptr<const DataType>;
@@ -53,7 +52,7 @@ public:
     ChildArrayField()
         : m_fieldDataAccessor( std::make_unique<DirectStorageAccessor>( this ) )
     {
-        static_assert( std::is_base_of<ObjectHandle, DataType>::value &&
+        static_assert( std::is_base_of_v<ObjectHandle, DataType> &&
                        "Child Array fields can only contain ObjectHandle-derived objects" );
     }
     ~ChildArrayField() override;
@@ -82,7 +81,7 @@ public:
     // Child objects
     std::vector<std::shared_ptr<ObjectHandle>>       childObjects() override;
     std::vector<std::shared_ptr<const ObjectHandle>> childObjects() const override;
-    void                                             removeChildObject( std::shared_ptr<const ObjectHandle> object );
+    void removeChildObject( const std::shared_ptr<const ObjectHandle>& object );
 
     std::string dataType() const override { return PortableDataType<std::vector<DataType>>::name(); }
 

@@ -26,8 +26,8 @@
 #include "cafAssert.h"
 
 #include <map>
+#include <memory>
 #include <string>
-#include <vector>
 
 namespace caffa
 {
@@ -37,10 +37,12 @@ namespace caffa
 /// This class can be considered private in the Pdm system
 //==================================================================================================
 
-class DefaultObjectFactory : public ObjectFactory
+class DefaultObjectFactory final : public ObjectFactory
 {
 public:
-    static DefaultObjectFactory* instance();
+    static std::shared_ptr<DefaultObjectFactory> instance();
+
+    ~DefaultObjectFactory() override = default;
 
     std::string name() const override { return "Default ObjectFactory"; }
 
@@ -67,10 +69,8 @@ private:
     std::shared_ptr<ObjectHandle> doCreate( const std::string_view& classKeyword ) override;
 
     DefaultObjectFactory() {}
-    ~DefaultObjectFactory() override { /* Could clean up, but ... */ }
 
     // Internal helper classes
-
     class ObjectCreatorBase
     {
     public:

@@ -1,7 +1,10 @@
 #include "cafDefaultObjectFactory.h"
 
+#include <ranges>
+
 namespace caffa
 {
+
 //--------------------------------------------------------------------------------------------------
 ///  ObjectFactory implementations
 //--------------------------------------------------------------------------------------------------
@@ -9,7 +12,7 @@ namespace caffa
 std::list<std::string> DefaultObjectFactory::classes() const
 {
     std::list<std::string> classList;
-    for ( auto [name, creator] : m_factoryMap )
+    for ( const auto& name : std::views::keys( m_factoryMap ) )
     {
         classList.push_back( name );
     }
@@ -21,24 +24,20 @@ std::list<std::string> DefaultObjectFactory::classes() const
 //--------------------------------------------------------------------------------------------------
 std::shared_ptr<ObjectHandle> DefaultObjectFactory::doCreate( const std::string_view& classKeyword )
 {
-    auto entryIt = m_factoryMap.find( classKeyword );
-    if ( entryIt != m_factoryMap.end() )
+    if ( auto entryIt = m_factoryMap.find( classKeyword ); entryIt != m_factoryMap.end() )
     {
         return entryIt->second->create();
     }
-    else
-    {
-        return nullptr;
-    }
+    return nullptr;
 }
 
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-DefaultObjectFactory* DefaultObjectFactory::instance()
+std::shared_ptr<DefaultObjectFactory> DefaultObjectFactory::instance()
 {
-    static DefaultObjectFactory* fact = new DefaultObjectFactory;
-    return fact;
+    static auto objectFactory = std::shared_ptr<DefaultObjectFactory>( new DefaultObjectFactory );
+    return objectFactory;
 }
 
 } // End of namespace caffa

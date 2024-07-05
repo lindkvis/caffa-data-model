@@ -27,7 +27,6 @@
 #include "cafObjectHandle.h"
 #include "cafObjectHandlePortableDataType.h"
 
-#include <concepts>
 #include <memory>
 #include <type_traits>
 
@@ -40,11 +39,11 @@ namespace caffa
  * @tparam DataTypePtr A pointer to a class derived from caffa::Object
  */
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
-class ChildField : public ChildFieldHandle
+requires is_pointer<DataTypePtr>
+class ChildField final : public ChildFieldHandle
 {
 public:
-    using DataType      = typename std::remove_pointer<DataTypePtr>::type;
+    using DataType      = std::remove_pointer_t<DataTypePtr>;
     using Ptr           = std::shared_ptr<DataType>;
     using ConstPtr      = std::shared_ptr<const DataType>;
     using FieldDataType = DataTypePtr;
@@ -57,7 +56,7 @@ public:
                        "Child fields can only contain ObjectHandle-derived objects" );
     }
 
-    virtual ~ChildField();
+    ~ChildField() override;
 
     bool empty() const override { return !object(); }
 
