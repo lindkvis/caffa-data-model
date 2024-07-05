@@ -32,6 +32,8 @@ class ObjectHandle;
 class Inspector
 {
 public:
+    virtual ~Inspector() = default;
+
     void visit( const ObjectHandle* object );
     void visit( const ChildFieldBaseHandle* field );
     void visit( const DataField* field );
@@ -49,6 +51,8 @@ private:
 class Editor
 {
 public:
+    virtual ~Editor() = default;
+
     void visit( ObjectHandle* object );
     void visit( ChildFieldBaseHandle* field );
     void visit( DataField* field );

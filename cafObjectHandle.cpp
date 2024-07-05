@@ -23,10 +23,11 @@
 #include "cafObjectHandle.h"
 
 #include "cafAssert.h"
-#include "cafChildArrayField.h"
 #include "cafFieldHandle.h"
 #include "cafUuidGenerator.h"
 #include "cafVisitor.h"
+
+#include <ranges>
 
 using namespace caffa;
 
@@ -54,7 +55,7 @@ ObjectHandle::~ObjectHandle() noexcept
 std::vector<FieldHandle*> ObjectHandle::fields() const
 {
     std::vector<FieldHandle*> fieldVector;
-    for ( auto& [ignore, field] : m_fields )
+    for ( auto& field : std::views::values( m_fields ) )
     {
         fieldVector.push_back( field );
     }
@@ -67,7 +68,7 @@ std::vector<FieldHandle*> ObjectHandle::fields() const
 std::vector<MethodHandle*> ObjectHandle::methods() const
 {
     std::vector<MethodHandle*> methodVector;
-    for ( auto& [ignore, method] : m_methods )
+    for ( auto& method : std::views::values( m_methods ) )
     {
         methodVector.push_back( method );
     }

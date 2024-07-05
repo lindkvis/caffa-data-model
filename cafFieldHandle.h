@@ -3,7 +3,6 @@
 #include <list>
 #include <memory>
 #include <string>
-#include <utility>
 
 namespace caffa
 {
@@ -94,8 +93,10 @@ CapabilityType* FieldHandle::capability()
 {
     for ( auto& capabilityPtr : m_capabilities )
     {
-        CapabilityType* capability = dynamic_cast<CapabilityType*>( capabilityPtr.get() );
-        if ( capability ) return capability;
+        if ( auto capability = dynamic_cast<CapabilityType*>( capabilityPtr.get() ); capability )
+        {
+            return capability;
+        }
     }
     return nullptr;
 }
@@ -108,8 +109,10 @@ const CapabilityType* FieldHandle::capability() const
 {
     for ( const auto& capabilityPtr : m_capabilities )
     {
-        const CapabilityType* capability = dynamic_cast<const CapabilityType*>( capabilityPtr.get() );
-        if ( capability ) return capability;
+        if ( auto capability = dynamic_cast<const CapabilityType*>( capabilityPtr.get() ); capability )
+        {
+            return capability;
+        }
     }
     return nullptr;
 }

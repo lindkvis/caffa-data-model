@@ -36,7 +36,7 @@
 namespace caffa
 {
 template <typename T>
-concept enum_type = std::is_enum<T>::value;
+concept enum_type = std::is_enum_v<T>;
 
 /**
  * An enum class wrapper to enable introspection and automatic I/O on enums.
@@ -61,7 +61,7 @@ concept enum_type = std::is_enum<T>::value;
  * }
  */
 template <typename Enum>
-    requires enum_type<Enum>
+requires enum_type<Enum>
 class AppEnum
 {
 public:
@@ -154,9 +154,9 @@ public:
         return std::nullopt;
     }
 
-    size_t size() const { return m_mapping.size(); }
+    [[nodiscard]] size_t size() const { return m_mapping.size(); }
 
-    std::vector<std::string> labels() const
+    [[nodiscard]] std::vector<std::string> labels() const
     {
         std::vector<std::string> labelList;
         for ( const auto& [ignore, label] : m_mapping )
@@ -166,7 +166,9 @@ public:
         return labelList;
     }
 
-    std::string label() const { return this->label( value() ); }
+    [[nodiscard]] std::string label() const { return this->label( value() ); }
+
+    explicit operator Enum() const { return m_value.value(); }
 
     std::string label( Enum enumValue ) const
     {
@@ -221,7 +223,7 @@ public:
     // Static interface to access the properties of the enum definition
 
     static bool   isValid( const std::string& label ) { return AppEnum<Enum>().enumVal( label ).has_value(); }
-    static bool   isValid( size_t index ) { return AppEnum<Enum>().enumval( index ).has_value(); }
+    static bool   isValid( size_t index ) { return AppEnum<Enum>().enumVal( index ).has_value(); }
     static size_t validSize() { return AppEnum<Enum>().size(); }
 
     static std::vector<std::string> validLabels() { return AppEnum<Enum>().labels(); }
