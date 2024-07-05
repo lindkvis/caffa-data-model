@@ -21,9 +21,7 @@ public:
     FieldHandle();
     virtual ~FieldHandle();
 
-    std::string         keyword() const { return m_keyword; }
-    ObjectHandle*       ownerObject();
-    const ObjectHandle* ownerObject() const;
+    std::string keyword() const { return m_keyword; }
 
     virtual std::string dataType() const = 0;
 
@@ -63,18 +61,16 @@ public:
     void               setDocumentation( const std::string& documentation );
     const std::string& documentation() const;
 
+    FieldHandle( const FieldHandle& ) = delete;
+
 protected:
-    bool isInitialized() const { return m_ownerObject != nullptr; }
+    bool isInitialized() const { return !m_keyword.empty(); }
 
     std::list<FieldCapability*> capabilities();
 
 private:
-    FieldHandle( const FieldHandle& )            = delete;
-    FieldHandle& operator=( const FieldHandle& ) = delete;
-
-    friend class ObjectHandle; // Give access to m_ownerObject and set Keyword
-    void          setKeyword( const std::string& keyword );
-    ObjectHandle* m_ownerObject;
+    friend class ObjectHandle; // Give access to setKeyword
+    void setKeyword( const std::string& keyword );
 
     std::string m_keyword;
 

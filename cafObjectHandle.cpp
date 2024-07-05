@@ -80,8 +80,6 @@ std::vector<MethodHandle*> ObjectHandle::methods() const
 //--------------------------------------------------------------------------------------------------
 void ObjectHandle::addField( FieldHandle* field, const std::string& keyword )
 {
-    field->m_ownerObject = this;
-
     CAFFA_ASSERT( ObjectHandle::isValidKeyword( keyword ) );
     CAFFA_ASSERT( !keyword.empty() );
     CAFFA_ASSERT( !m_fields.contains( keyword ) && "Object already has a field with this keyword!" );
