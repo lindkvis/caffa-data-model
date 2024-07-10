@@ -19,6 +19,8 @@
 // ##################################################################################################
 #pragma once
 
+#include <cstddef>
+
 namespace caffa
 {
 class ChildFieldBaseHandle;
@@ -32,6 +34,9 @@ class ObjectHandle;
 class Inspector
 {
 public:
+    explicit Inspector( bool requireReadable = true );
+    virtual ~Inspector() = default;
+
     void visit( const ObjectHandle* object );
     void visit( const ChildFieldBaseHandle* field );
     void visit( const DataField* field );
@@ -41,6 +46,10 @@ private:
     virtual void visitField( const FieldHandle* field )    = 0;
     virtual void leaveObject( const ObjectHandle* object ) {}
     virtual void leaveField( const FieldHandle* field ) {}
+    virtual void visitChild( const ChildFieldBaseHandle* field, size_t index ) {}
+    virtual void leaveChild( const ChildFieldBaseHandle* field, size_t index ) {}
+
+    bool m_requireReadable;
 };
 
 /**
@@ -49,6 +58,9 @@ private:
 class Editor
 {
 public:
+    explicit Editor( bool requireWritable = true );
+    virtual ~Editor() = default;
+
     void visit( ObjectHandle* object );
     void visit( ChildFieldBaseHandle* field );
     void visit( DataField* field );
@@ -58,6 +70,10 @@ private:
     virtual void visitField( FieldHandle* field )    = 0;
     virtual void leaveObject( ObjectHandle* object ) {}
     virtual void leaveField( FieldHandle* field ) {}
+    virtual void visitChild( ChildFieldBaseHandle* field, size_t index ) {}
+    virtual void leaveChild( ChildFieldBaseHandle* field, size_t index ) {}
+
+    bool m_requireWritable;
 };
 
 } // namespace caffa
