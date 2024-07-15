@@ -23,10 +23,11 @@
 #include "cafObjectHandle.h"
 
 #include "cafAssert.h"
-#include "cafChildArrayField.h"
 #include "cafFieldHandle.h"
 #include "cafUuidGenerator.h"
 #include "cafVisitor.h"
+
+#include <ranges>
 
 using namespace caffa;
 
@@ -44,17 +45,37 @@ ObjectHandle::ObjectHandle( bool generateUuid /* = true */ )
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-ObjectHandle::~ObjectHandle() noexcept
+ObjectHandle::~ObjectHandle() noexcept = default;
+
+bool ObjectHandle::isValidKeyword( const std::string& type )
 {
+    if ( type == "keyword" ) return false;
+    if ( type == "uuid" ) return false;
+
+    if ( StringTools::isdigit( type[0] ) ) return false;
+
+    const auto end = std::ranges::find( type, '\0' );
+
+    const auto validCount = std::count_if( type.cbegin(), end, ObjectHandle::isValidCharacter );
+    const auto invalidCount =
+        std::count_if( type.cbegin(), end, []( auto c ) { return !ObjectHandle::isValidCharacter( c ); } );
+
+    return validCount > 0u && invalidCount == 0u;
 }
 
+bool ObjectHandle::matchesClassKeyword( const std::string_view& classKeyword, const std::vector<std::string>& inheritanceStack )
+{
+    return std::any_of( inheritanceStack.begin(),
+                        inheritanceStack.end(),
+                        [&classKeyword]( const std::string& testKeyword ) { return classKeyword == testKeyword; } );
+}
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
 std::vector<FieldHandle*> ObjectHandle::fields() const
 {
     std::vector<FieldHandle*> fieldVector;
-    for ( auto& [ignore, field] : m_fields )
+    for ( auto& field : std::views::values( m_fields ) )
     {
         fieldVector.push_back( field );
     }
@@ -67,7 +88,7 @@ std::vector<FieldHandle*> ObjectHandle::fields() const
 std::vector<MethodHandle*> ObjectHandle::methods() const
 {
     std::vector<MethodHandle*> methodVector;
-    for ( auto& [ignore, method] : m_methods )
+    for ( auto& method : std::views::values( m_methods ) )
     {
         methodVector.push_back( method );
     }

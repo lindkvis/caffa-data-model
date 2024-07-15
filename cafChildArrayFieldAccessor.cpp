@@ -30,9 +30,7 @@ ChildArrayFieldDirectStorageAccessor::ChildArrayFieldDirectStorageAccessor( Fiel
     : ChildArrayFieldAccessor( field )
 {
 }
-ChildArrayFieldDirectStorageAccessor::~ChildArrayFieldDirectStorageAccessor()
-{
-}
+ChildArrayFieldDirectStorageAccessor::~ChildArrayFieldDirectStorageAccessor() = default;
 
 size_t ChildArrayFieldDirectStorageAccessor::size() const
 {

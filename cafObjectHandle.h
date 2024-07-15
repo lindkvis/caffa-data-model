@@ -23,7 +23,6 @@
 
 #pragma once
 
-#include "cafAssert.h"
 #include "cafFieldHandle.h"
 #include "cafMethodHandle.h"
 #include "cafStringTools.h"
@@ -47,95 +46,90 @@ class Editor;
 class ObjectHandle
 {
 public:
-    using InheritanceStackType = std::vector<std::string>;
-
-    ObjectHandle( bool generateUuid = true );
+    explicit ObjectHandle( bool generateUuid = true );
     virtual ~ObjectHandle() noexcept;
 
     // TODO: Once compilers support constexpr std::vector and std::string these can be made constexpr
-    static std::string  classKeywordStatic() { return "ObjectHandle"; }
-    virtual std::string classKeyword() const { return classKeywordStatic(); }
+    static constexpr std::string_view                classKeywordStatic() { return "ObjectHandle"; }
+    [[nodiscard]] virtual constexpr std::string_view classKeyword() const { return classKeywordStatic(); }
 
-    virtual InheritanceStackType classInheritanceStack() const { return { classKeywordStatic() }; }
+    [[nodiscard]] virtual std::vector<std::string> classInheritanceStack() const
+    {
+        return { std::string( classKeywordStatic() ) };
+    }
     /**
      * @brief Get the parent class keyword
      *
      * @return std::string Class keyword of the parent class
      */
-    std::string parentClassKeyword() const
-    {
-        // ObjectHandle is abstract and cannot be instantiated.
-        // Any child class will have a minimum of 2 items in stack.
-        auto stack = classInheritanceStack();
-        CAFFA_ASSERT( stack.size() >= 2 );
-        return stack[1];
-    }
+    [[nodiscard]] virtual constexpr std::string_view parentClassKeyword() const { return ""; }
 
-    static bool matchesClassKeyword( const std::string& classKeyword, const InheritanceStackType& inheritanceStack )
-    {
-        return std::any_of( inheritanceStack.begin(),
-                            inheritanceStack.end(),
-                            [&classKeyword]( const std::string& testKeyword ) { return classKeyword == testKeyword; } );
-    }
+    static bool matchesClassKeyword( const std::string_view&         classKeyword,
+                                     const std::vector<std::string>& inheritanceStack );
 
-    static constexpr bool isValidCharacter( char c )
+    static constexpr bool isValidCharacter( const char c )
     {
-        return caffa::StringTools::isalpha( c ) || caffa::StringTools::isdigit( c ) || c == '_' || c == ':';
+        return StringTools::isalpha( c ) || StringTools::isdigit( c ) || c == '_' || c == ':';
     }
 
     /**
      * Checks whether the keyword is a valid one.
      * We accept regular letters and underscore '_'
      */
-    static constexpr bool isValidKeyword( const std::string_view& type )
+    template <StringTools::FixedString type>
+    static constexpr bool isValidKeyword()
     {
-        if ( type == "keyword" ) return false;
+        constexpr std::string_view view = type;
+        if ( view == "keyword" ) return false;
+        if ( view == "uuid" ) return false;
 
-        if ( caffa::StringTools::isdigit( type[0] ) ) return false;
+        if ( StringTools::isdigit( view[0] ) ) return false;
 
-        auto end = std::find( type.begin(), type.end(), '\0' );
+        constexpr auto end = std::ranges::find( view, '\0' );
 
-        auto validCount = std::count_if( type.cbegin(), end, ObjectHandle::isValidCharacter );
-        auto invalidCount =
-            std::count_if( type.cbegin(), end, []( auto c ) { return !ObjectHandle::isValidCharacter( c ); } );
+        constexpr auto validCount = std::count_if( view.cbegin(), end, ObjectHandle::isValidCharacter );
+        constexpr auto invalidCount =
+            std::count_if( view.cbegin(), end, []( auto c ) { return !ObjectHandle::isValidCharacter( c ); } );
 
         return validCount > 0u && invalidCount == 0u;
     }
 
-    virtual std::string classDocumentation() const { return ""; }
+    static bool isValidKeyword( const std::string& type );
+
+    [[nodiscard]] virtual std::string classDocumentation() const { return ""; }
 
     /**
      * The registered fields contained in this Object.
      * @return a vector of FieldHandle pointers
      */
-    std::vector<FieldHandle*> fields() const;
+    [[nodiscard]] std::vector<FieldHandle*> fields() const;
 
     /**
      * The registered methods for this Object.
      * @return a list of MethodHandle pointers
      */
-    std::vector<MethodHandle*> methods() const;
+    [[nodiscard]] std::vector<MethodHandle*> methods() const;
 
     /**
      * Find a particular field by keyword
      * @param keyword
      * @return a FieldHandle pointer
      */
-    FieldHandle* findField( const std::string& keyword ) const;
+    [[nodiscard]] FieldHandle* findField( const std::string& keyword ) const;
 
     /**
      * Find a particular method by keyword
      * @param keyword
      * @return a MethodHandle pointer
      */
-    MethodHandle* findMethod( const std::string& keyword ) const;
+    [[nodiscard]] MethodHandle* findMethod( const std::string& keyword ) const;
 
-    const std::string& uuid() const;
-    void               setUuid( const std::string& );
+    [[nodiscard]] const std::string& uuid() const;
+    void                             setUuid( const std::string& );
 
     /// Method gets called from Document after all objects are read.
     /// Re-implement to set up internal pointers etc. in your data structure
-    virtual void initAfterRead() {};
+    virtual void initAfterRead(){};
 
     /**
      * Accept the visit by an inspecting visitor
@@ -149,6 +143,9 @@ public:
      */
     void accept( Editor* editor );
 
+    ObjectHandle( const ObjectHandle& )            = delete;
+    ObjectHandle& operator=( const ObjectHandle& ) = delete;
+
 protected:
     /**
      * Add a field to the object
@@ -161,9 +158,6 @@ protected:
     void addMethod( MethodHandle* method, const std::string& keyword );
 
 private:
-    ObjectHandle( const ObjectHandle& )            = delete;
-    ObjectHandle& operator=( const ObjectHandle& ) = delete;
-
     std::string m_uuid;
 
     // Fields
@@ -174,7 +168,7 @@ private:
 };
 
 template <typename T>
-concept DerivesFromObjectHandle = std::is_base_of<ObjectHandle, T>::value;
+concept DerivesFromObjectHandle = std::is_base_of_v<ObjectHandle, T>;
 
 template <typename T>
 struct is_shared_ptr : std::false_type

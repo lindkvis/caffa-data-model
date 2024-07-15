@@ -31,7 +31,7 @@ namespace caffa
 template <DerivesFromObjectHandle DataType>
 struct PortableDataType<DataType>
 {
-    static std::string name() { return std::string( "object::" ) + DataType::classKeywordStatic(); }
+    static std::string name() { return std::string( "object::" ) + std::string( DataType::classKeywordStatic() ); }
 };
 
 /**
@@ -40,6 +40,9 @@ struct PortableDataType<DataType>
 template <IsSharedPtr DataType>
 struct PortableDataType<DataType>
 {
-    static std::string name() { return std::string( "object::" ) + DataType::element_type::classKeywordStatic(); }
+    static std::string name()
+    {
+        return std::string( "object::" ) + std::string( DataType::element_type::classKeywordStatic() );
+    }
 };
 } // namespace caffa

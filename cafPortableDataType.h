@@ -22,8 +22,6 @@
 #include <chrono>
 #include <concepts>
 #include <string>
-#include <typeinfo>
-#include <utility>
 #include <vector>
 
 namespace caffa
