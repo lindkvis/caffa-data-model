@@ -36,7 +36,7 @@
 namespace caffa
 {
 template <typename T>
-concept enum_type = std::is_enum<T>::value;
+concept enum_type = std::is_enum_v<T>;
 
 /**
  * An enum class wrapper to enable introspection and automatic I/O on enums.
@@ -61,11 +61,12 @@ concept enum_type = std::is_enum<T>::value;
  * }
  */
 template <typename Enum>
-    requires enum_type<Enum>
+requires enum_type<Enum>
 class AppEnum
 {
 public:
-    using DataType = Enum;
+    using DataType       = Enum;
+    using UnderlyingType = std::underlying_type_t<Enum>;
 
     AppEnum()
     {
@@ -76,6 +77,15 @@ public:
         : m_value( value )
     {
         setUp();
+    }
+    explicit AppEnum( UnderlyingType value )
+    {
+        setUp();
+        if ( !validIntegral( value ) )
+        {
+            throw std::runtime_error( "AppEnum does not have the value " + std::to_string( value ) );
+        }
+        m_value = static_cast<Enum>( value );
     }
     AppEnum( const std::string& value )
     {
@@ -193,6 +203,18 @@ public:
         return label;
     }
 
+    bool validIntegral( UnderlyingType integralValue ) const
+    {
+        for ( size_t i = 0; i < m_mapping.size(); ++i )
+        {
+            if ( static_cast<UnderlyingType>( m_mapping[i].first ) == integralValue )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     size_t index( Enum enumValue ) const
     {
         std::optional<size_t> foundIndex;
@@ -220,8 +242,11 @@ public:
 
     // Static interface to access the properties of the enum definition
 
-    static bool   isValid( const std::string& label ) { return AppEnum<Enum>().enumVal( label ).has_value(); }
-    static bool   isValid( size_t index ) { return AppEnum<Enum>().enumval( index ).has_value(); }
+    static bool isValid( const std::string& label ) { return AppEnum<Enum>().enumVal( label ).has_value(); }
+    static bool isValidIndex( size_t index ) { return AppEnum<Enum>().enumVal( index ).has_value(); }
+
+    static bool isValidIntegral( UnderlyingType value ) { return AppEnum<Enum>().validIntegral( value ); }
+
     static size_t validSize() { return AppEnum<Enum>().size(); }
 
     static std::vector<std::string> validLabels() { return AppEnum<Enum>().labels(); }
