@@ -3,7 +3,6 @@
 #include <list>
 #include <memory>
 #include <string>
-#include <utility>
 
 namespace caffa
 {
@@ -22,11 +21,11 @@ public:
     FieldHandle();
     virtual ~FieldHandle();
 
-    std::string         keyword() const { return m_keyword; }
-    ObjectHandle*       ownerObject();
-    const ObjectHandle* ownerObject() const;
+    [[nodiscard]] std::string         keyword() const { return m_keyword; }
+    ObjectHandle*                     ownerObject();
+    [[nodiscard]] const ObjectHandle* ownerObject() const;
 
-    virtual std::string dataType() const = 0;
+    [[nodiscard]] virtual std::string dataType() const = 0;
 
     // Capabilities
     void addCapability( std::unique_ptr<FieldCapability> capability );
@@ -51,28 +50,27 @@ public:
     /**
      * Can the field be read. A non-scriptable field cannot be read within the client.
      */
-    virtual bool isReadable() const = 0;
+    [[nodiscard]] virtual bool isReadable() const = 0;
 
     /**
      * Can the field be written to. A non-scriptable field cannot be written to within the client.
      */
-    virtual bool isWritable() const = 0;
+    [[nodiscard]] virtual bool isWritable() const = 0;
 
-    bool isDeprecated() const;
-    void markDeprecated();
+    [[nodiscard]] bool isDeprecated() const;
+    void               markDeprecated();
 
-    void               setDocumentation( const std::string& documentation );
-    const std::string& documentation() const;
+    void                             setDocumentation( const std::string& documentation );
+    [[nodiscard]] const std::string& documentation() const;
+
+    FieldHandle( const FieldHandle& ) = delete;
 
 protected:
-    bool isInitialized() const { return m_ownerObject != nullptr; }
+    [[nodiscard]] bool isInitialized() const { return m_ownerObject != nullptr; }
 
     std::list<FieldCapability*> capabilities();
 
 private:
-    FieldHandle( const FieldHandle& )            = delete;
-    FieldHandle& operator=( const FieldHandle& ) = delete;
-
     friend class ObjectHandle; // Give access to m_ownerObject and set Keyword
     void          setKeyword( const std::string& keyword );
     ObjectHandle* m_ownerObject;
@@ -94,7 +92,7 @@ CapabilityType* FieldHandle::capability()
 {
     for ( auto& capabilityPtr : m_capabilities )
     {
-        CapabilityType* capability = dynamic_cast<CapabilityType*>( capabilityPtr.get() );
+        auto* capability = dynamic_cast<CapabilityType*>( capabilityPtr.get() );
         if ( capability ) return capability;
     }
     return nullptr;
@@ -108,7 +106,7 @@ const CapabilityType* FieldHandle::capability() const
 {
     for ( const auto& capabilityPtr : m_capabilities )
     {
-        const CapabilityType* capability = dynamic_cast<const CapabilityType*>( capabilityPtr.get() );
+        const auto* capability = dynamic_cast<const CapabilityType*>( capabilityPtr.get() );
         if ( capability ) return capability;
     }
     return nullptr;

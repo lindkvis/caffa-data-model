@@ -60,12 +60,12 @@ public:
     {
     }
 
-    Field( std::unique_ptr<DataAccessor> accessor )
+    explicit Field( std::unique_ptr<DataAccessor> accessor )
         : m_fieldDataAccessor( std::move( accessor ) )
     {
     }
 
-    ~Field() noexcept override {}
+    ~Field() noexcept override = default;
 
     // Assignment
 
@@ -144,14 +144,20 @@ public:
     // Access operators
 
     /*Conversion */
-    operator DataType() const { return this->value(); }
+             operator DataType() const { return this->value(); }
     DataType operator()() const { return this->value(); }
     DataType operator*() const { return this->value(); }
 
     auto operator<=>( const DataType& fieldValue ) const { return this->value() <=> fieldValue; }
 
-    bool isReadable() const override { return m_fieldDataAccessor != nullptr && m_fieldDataAccessor->hasGetter(); }
-    bool isWritable() const override { return m_fieldDataAccessor != nullptr && m_fieldDataAccessor->hasSetter(); }
+    [[nodiscard]] bool isReadable() const override
+    {
+        return m_fieldDataAccessor != nullptr && m_fieldDataAccessor->hasGetter();
+    }
+    [[nodiscard]] bool isWritable() const override
+    {
+        return m_fieldDataAccessor != nullptr && m_fieldDataAccessor->hasSetter();
+    }
 
     // Replace accessor
     void setAccessor( std::unique_ptr<DataAccessor> accessor ) { m_fieldDataAccessor = std::move( accessor ); }

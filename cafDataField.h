@@ -46,7 +46,7 @@ public:
     virtual DataType value() const                          = 0;
     virtual void     setValue( const DataType& fieldValue ) = 0;
 
-    std::string dataType() const override { return PortableDataType<DataType>::name(); }
+    [[nodiscard]] std::string dataType() const override { return PortableDataType<DataType>::name(); }
 };
 
 } // namespace caffa
