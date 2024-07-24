@@ -4,7 +4,6 @@
 #include "cafField.h"
 
 #include <functional>
-#include <type_traits>
 
 namespace caffa
 {
@@ -12,8 +11,8 @@ template <typename DataType>
 class SetValueInterface
 {
 public:
-    virtual ~SetValueInterface() = default;
-    virtual void                                         setValue( const DataType& value ) = 0;
+    virtual ~SetValueInterface()                                                 = default;
+    virtual void                               setValue( const DataType& value ) = 0;
     virtual std::unique_ptr<SetValueInterface> clone() const                     = 0;
 };
 
@@ -44,8 +43,8 @@ template <typename DataType>
 class GetValueInterface
 {
 public:
-    virtual ~GetValueInterface() = default;
-    virtual DataType                                     getValue() const = 0;
+    virtual ~GetValueInterface()                                = default;
+    virtual DataType                           getValue() const = 0;
     virtual std::unique_ptr<GetValueInterface> clone() const    = 0;
 };
 
