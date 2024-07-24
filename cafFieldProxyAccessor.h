@@ -5,7 +5,6 @@
 
 #include <functional>
 #include <type_traits>
-#include <vector>
 
 namespace caffa
 {
@@ -13,28 +12,28 @@ template <typename DataType>
 class SetValueInterface
 {
 public:
-    virtual ~SetValueInterface() {}
+    virtual ~SetValueInterface() = default;
     virtual void                                         setValue( const DataType& value ) = 0;
-    virtual std::unique_ptr<SetValueInterface<DataType>> clone() const                     = 0;
+    virtual std::unique_ptr<SetValueInterface> clone() const                     = 0;
 };
 
 template <typename DataType>
-class SetterMethodCB : public SetValueInterface<DataType>
+class SetterMethodCB final : public SetValueInterface<DataType>
 {
 public:
     using SetterMethodType = std::function<void( const DataType& )>;
 
-    SetterMethodCB( SetterMethodType setterMethod ) { m_setterMethod = setterMethod; }
+    explicit SetterMethodCB( SetterMethodType setterMethod ) { m_setterMethod = setterMethod; }
 
-    void setValue( const DataType& value )
+    void setValue( const DataType& value ) override
     {
         CAFFA_ASSERT( m_setterMethod );
         m_setterMethod( value );
     }
 
-    virtual std::unique_ptr<SetValueInterface<DataType>> clone() const
+    std::unique_ptr<SetValueInterface<DataType>> clone() const override
     {
-        return std::make_unique<SetterMethodCB<DataType>>( m_setterMethod );
+        return std::make_unique<SetterMethodCB>( m_setterMethod );
     }
 
 private:
@@ -45,24 +44,24 @@ template <typename DataType>
 class GetValueInterface
 {
 public:
-    virtual ~GetValueInterface() {}
+    virtual ~GetValueInterface() = default;
     virtual DataType                                     getValue() const = 0;
-    virtual std::unique_ptr<GetValueInterface<DataType>> clone() const    = 0;
+    virtual std::unique_ptr<GetValueInterface> clone() const    = 0;
 };
 
 template <typename DataType>
-class GetterMethodCB : public GetValueInterface<DataType>
+class GetterMethodCB final : public GetValueInterface<DataType>
 {
 public:
     using GetterMethodType = std::function<DataType()>;
 
-    GetterMethodCB( GetterMethodType setterMethod ) { m_getterMethod = setterMethod; }
+    explicit GetterMethodCB( GetterMethodType setterMethod ) { m_getterMethod = setterMethod; }
 
-    DataType getValue() const { return m_getterMethod(); }
+    DataType getValue() const override { return m_getterMethod(); }
 
-    virtual std::unique_ptr<GetValueInterface<DataType>> clone() const
+    std::unique_ptr<GetValueInterface<DataType>> clone() const override
     {
-        return std::make_unique<GetterMethodCB<DataType>>( m_getterMethod );
+        return std::make_unique<GetterMethodCB>( m_getterMethod );
     }
 
 private:
@@ -70,7 +69,7 @@ private:
 };
 
 template <typename DataType>
-class FieldProxyAccessor : public DataFieldAccessor<DataType>
+class FieldProxyAccessor final : public DataFieldAccessor<DataType>
 {
 public:
     std::unique_ptr<DataFieldAccessor<DataType>> clone() const override
@@ -108,8 +107,8 @@ public:
         m_valueGetter = std::make_unique<GetterMethodCB<DataType>>( getterMethod );
     }
 
-    bool hasSetter() const override { return m_valueSetter != nullptr; }
-    bool hasGetter() const override { return m_valueGetter != nullptr; }
+    [[nodiscard]] bool hasSetter() const override { return m_valueSetter != nullptr; }
+    [[nodiscard]] bool hasGetter() const override { return m_valueGetter != nullptr; }
 
 private:
     std::unique_ptr<SetValueInterface<DataType>> m_valueSetter;
