@@ -26,6 +26,7 @@
 #include "cafAssert.h"
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -37,57 +38,56 @@ namespace caffa
 /// This class can be considered private in the Pdm system
 //==================================================================================================
 
-class DefaultObjectFactory : public ObjectFactory
+class DefaultObjectFactory final : public ObjectFactory
 {
 public:
-    static DefaultObjectFactory* instance();
+    static std::shared_ptr<DefaultObjectFactory> instance();
+    ~DefaultObjectFactory() override = default;
 
-    std::string name() const override { return "Default ObjectFactory"; }
+    [[nodiscard]] std::string name() const override { return "Default ObjectFactory"; }
 
-    std::list<std::string> classes() const;
+    [[nodiscard]] std::list<std::string> classes() const;
 
     template <typename ObjectBaseDerivative>
     bool registerCreator()
     {
         auto classKeyword = ObjectBaseDerivative::classKeywordStatic();
 
-        auto entryIt = m_factoryMap.find( classKeyword );
-        if ( entryIt != m_factoryMap.end() )
+        if ( auto entryIt = m_factoryMap.find( classKeyword ); entryIt != m_factoryMap.end() )
         {
             CAFFA_ASSERT( classKeyword != entryIt->first ); // classKeyword has already been used
             CAFFA_ASSERT( false ); // To be sure ..
             return false; // never hit;
         }
-        auto object                               = new ObjectCreator<ObjectBaseDerivative>();
-        m_factoryMap[std::string( classKeyword )] = object;
+        auto object                               = std::make_unique<ObjectCreator<ObjectBaseDerivative>>();
+        m_factoryMap[std::string( classKeyword )] = std::move( object );
         return true;
     }
 
 private:
     std::shared_ptr<ObjectHandle> doCreate( const std::string_view& classKeyword ) override;
 
-    DefaultObjectFactory() {}
-    ~DefaultObjectFactory() override { /* Could clean up, but ... */ }
+    DefaultObjectFactory() = default;
 
     // Internal helper classes
 
     class ObjectCreatorBase
     {
     public:
-        ObjectCreatorBase() {}
-        virtual ~ObjectCreatorBase() {}
+        ObjectCreatorBase()                            = default;
+        virtual ~ObjectCreatorBase()                   = default;
         virtual std::shared_ptr<ObjectHandle> create() = 0;
     };
 
     template <typename ObjectBaseDerivative>
-    class ObjectCreator : public ObjectCreatorBase
+    class ObjectCreator final : public ObjectCreatorBase
     {
     public:
         std::shared_ptr<ObjectHandle> create() override { return std::make_shared<ObjectBaseDerivative>(); }
     };
 
     // Map to store factory
-    std::map<std::string, ObjectCreatorBase*, std::less<>> m_factoryMap;
+    std::map<std::string, std::shared_ptr<ObjectCreatorBase>, std::less<>> m_factoryMap;
 };
 
 } // End of namespace caffa

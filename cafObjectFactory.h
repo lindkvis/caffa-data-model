@@ -28,6 +28,7 @@
 
 namespace caffa
 {
+
 //==================================================================================================
 //
 // Factory interface for creating CAF objects derived from ObjectHandle based on class name keyword
@@ -38,11 +39,11 @@ class ObjectFactory
 public:
     std::shared_ptr<ObjectHandle> create( const std::string_view& classKeyword ) { return doCreate( classKeyword ); }
 
-    virtual std::string name() const = 0;
+    [[nodiscard]] virtual std::string name() const = 0;
 
 protected:
-    ObjectFactory() {}
-    virtual ~ObjectFactory() {}
+    ObjectFactory()          = default;
+    virtual ~ObjectFactory() = default;
 
 private:
     virtual std::shared_ptr<ObjectHandle> doCreate( const std::string_view& classKeyword ) = 0;
