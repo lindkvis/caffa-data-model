@@ -71,6 +71,9 @@ template <typename DataType>
 class FieldProxyAccessor final : public DataFieldAccessor<DataType>
 {
 public:
+    using GetterMethod = typename GetterMethodCB<DataType>::GetterMethodType;
+    using SetterMethod = typename SetterMethodCB<DataType>::SetterMethodType;
+
     std::unique_ptr<DataFieldAccessor<DataType>> clone() const override
     {
         auto copy           = std::make_unique<FieldProxyAccessor>();
@@ -96,12 +99,12 @@ public:
     // For some reason. Forward declaration did some weirdness.
 private:
 public:
-    void registerSetMethod( typename SetterMethodCB<DataType>::SetterMethodType setterMethod )
+    void registerSetMethod( SetterMethod setterMethod )
     {
         m_valueSetter = std::make_unique<SetterMethodCB<DataType>>( setterMethod );
     }
 
-    void registerGetMethod( typename GetterMethodCB<DataType>::GetterMethodType getterMethod )
+    void registerGetMethod( GetterMethod getterMethod )
     {
         m_valueGetter = std::make_unique<GetterMethodCB<DataType>>( getterMethod );
     }
