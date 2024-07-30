@@ -42,12 +42,6 @@ public:
     ~ChildArrayFieldHandle() override {}
 
     /**
-     * @brief Get the number of child objects.
-     *
-     * @return size_t
-     */
-    virtual size_t size() const = 0;
-    /**
      * @brief Check if the child array field is empty
      *
      * @return true if empty

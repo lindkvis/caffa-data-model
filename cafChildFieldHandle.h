@@ -44,6 +44,7 @@ public:
 
     virtual std::vector<std::shared_ptr<ObjectHandle>>       childObjects()       = 0;
     virtual std::vector<std::shared_ptr<const ObjectHandle>> childObjects() const = 0;
+    virtual size_t                                           size() const         = 0;
     virtual bool                                             empty() const        = 0;
 
     void accept( Inspector* visitor ) const override;
@@ -55,7 +56,8 @@ class ChildFieldHandle : public ChildFieldBaseHandle
 public:
     virtual void setChildObject( std::shared_ptr<ObjectHandle> object ) = 0;
 
-    virtual void setAccessor( std::unique_ptr<ChildFieldAccessor> accessor ) = 0;
-    virtual void clear()                                                     = 0;
+    virtual void         setAccessor( std::unique_ptr<ChildFieldAccessor> accessor ) = 0;
+    virtual void         clear()                                                     = 0;
+    [[nodiscard]] size_t size() const override { return empty() ? 0u : 1u; }
 };
 } // namespace caffa
