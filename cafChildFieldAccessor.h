@@ -30,7 +30,7 @@ class FieldHandle;
 class ChildFieldAccessor
 {
 public:
-    ChildFieldAccessor( FieldHandle* field )
+    explicit ChildFieldAccessor( FieldHandle* field )
         : m_field( field )
     {
     }
@@ -56,10 +56,10 @@ protected:
     FieldHandle* m_field;
 };
 
-class ChildFieldDirectStorageAccessor : public ChildFieldAccessor
+class ChildFieldDirectStorageAccessor final : public ChildFieldAccessor
 {
 public:
-    ChildFieldDirectStorageAccessor( FieldHandle* field )
+    explicit ChildFieldDirectStorageAccessor( FieldHandle* field )
         : ChildFieldAccessor( field )
     {
     }
