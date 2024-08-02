@@ -28,6 +28,7 @@
 
 #include <concepts>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -169,11 +170,21 @@ public:
     std::vector<std::string> labels() const
     {
         std::vector<std::string> labelList;
-        for ( const auto& [ignore, label] : m_mapping )
+        for ( const auto& label : std::views::values( m_mapping ) )
         {
             labelList.push_back( label );
         }
         return labelList;
+    }
+
+    std::vector<Enum> allEntries() const
+    {
+        std::vector<Enum> entries;
+        for ( const auto& entry : std::views::keys( m_mapping ) )
+        {
+            entries.push_back( entry );
+        }
+        return entries;
     }
 
     std::string label() const { return this->label( value() ); }
@@ -242,17 +253,18 @@ public:
 
     // Static interface to access the properties of the enum definition
 
-    static bool isValid( const std::string& label ) { return AppEnum<Enum>().enumVal( label ).has_value(); }
-    static bool isValidIndex( size_t index ) { return AppEnum<Enum>().enumVal( index ).has_value(); }
+    static bool isValid( const std::string& label ) { return AppEnum().enumVal( label ).has_value(); }
+    static bool isValidIndex( size_t index ) { return AppEnum().enumVal( index ).has_value(); }
 
-    static bool isValidIntegral( UnderlyingType value ) { return AppEnum<Enum>().validIntegral( value ); }
+    static bool isValidIntegral( UnderlyingType value ) { return AppEnum().validIntegral( value ); }
 
-    static size_t validSize() { return AppEnum<Enum>().size(); }
+    static size_t validSize() { return AppEnum().size(); }
 
-    static std::vector<std::string> validLabels() { return AppEnum<Enum>().labels(); }
+    static std::vector<std::string> validLabels() { return AppEnum().labels(); }
+    static std::vector<Enum>        entries() { return AppEnum().allEntries(); }
 
-    static size_t      getIndex( Enum enumValue ) { return AppEnum<Enum>().index( enumValue ); }
-    static std::string getLabel( Enum enumValue ) { return AppEnum<Enum>().label( enumValue ); }
+    static size_t      getIndex( Enum enumValue ) { return AppEnum().index( enumValue ); }
+    static std::string getLabel( Enum enumValue ) { return AppEnum().label( enumValue ); }
 
 private:
     //==================================================================================================
