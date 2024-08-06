@@ -31,6 +31,7 @@ class DataField : public FieldHandle
 {
 public:
     virtual void setUntypedAccessor( std::unique_ptr<DataFieldAccessorInterface> accessor ) = 0;
+    virtual void applyDirectStorageAccessor()                                               = 0;
 
     void accept( Inspector* visitor ) const override { visitor->visit( this ); }
     void accept( Editor* editor ) override { editor->visit( this ); }

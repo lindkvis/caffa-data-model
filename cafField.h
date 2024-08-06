@@ -162,6 +162,8 @@ public:
     // Replace accessor
     void setAccessor( std::unique_ptr<DataAccessor> accessor ) { m_fieldDataAccessor = std::move( accessor ); }
 
+    void applyDirectStorageAccessor() override { setAccessor( std::make_unique<DirectStorageAccessor>() ); }
+
     void setUntypedAccessor( std::unique_ptr<DataFieldAccessorInterface> accessor ) override
     {
         if ( accessor )

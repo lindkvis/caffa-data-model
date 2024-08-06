@@ -68,7 +68,7 @@ private:
 };
 
 template <typename DataType>
-class FieldProxyAccessor final : public DataFieldAccessor<DataType>
+class FieldProxyAccessor : public DataFieldAccessor<DataType>
 {
 public:
     using GetterMethod = typename GetterMethodCB<DataType>::GetterMethodType;
