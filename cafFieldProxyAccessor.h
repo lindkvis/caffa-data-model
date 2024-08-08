@@ -26,7 +26,7 @@ public:
 
     void setValue( const DataType& value ) override
     {
-        CAFFA_ASSERT( m_setterMethod );
+        if ( !m_setterMethod ) throw std::runtime_error( "No setter in Proxy Accessor" );
         m_setterMethod( value );
     }
 
