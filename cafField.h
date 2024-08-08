@@ -113,6 +113,13 @@ public:
             throw std::runtime_error( errorMessage );
         }
 
+        if ( !m_fieldDataAccessor->hasSetter() )
+        {
+            std::string errorMessage = "Failed to set value for '" + this->keyword() + "': Field is not writable";
+            CAFFA_ERROR( errorMessage );
+            throw std::runtime_error( errorMessage );
+        }
+
         try
         {
             for ( const auto& validator : m_valueValidators )
