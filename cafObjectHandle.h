@@ -43,7 +43,7 @@ class Editor;
 /**
  * The base class of all objects
  */
-class ObjectHandle
+class ObjectHandle : public std::enable_shared_from_this<ObjectHandle>
 {
 public:
     explicit ObjectHandle( bool generateUuid = true );
