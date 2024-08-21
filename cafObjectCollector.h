@@ -46,7 +46,7 @@ public:
         if ( !object ) return;
 
         auto typedObject = std::dynamic_pointer_cast<const ObjectType>( object );
-        if ( typedObject && ( !m_selector || m_selector( typedObject ) ) )
+        if ( typedObject && ( !m_selector || m_selector( typedObject.get() ) ) )
         {
             m_objects.push_back( typedObject );
         }
@@ -70,7 +70,7 @@ public:
 
     void visit( const DataField* field ) override {}
 
-    const std::list<const ObjectType*>& objects() const { return m_objects; }
+    const std::list<std::shared_ptr<const ObjectType>>& objects() const { return m_objects; }
 
 private:
     Selector                                     m_selector;
@@ -90,12 +90,12 @@ public:
         : m_selector( selector )
     {
     }
-    const std::list<ObjectType*>& objects() { return m_objects; }
+    const std::list<std::shared_ptr<ObjectType>>& objects() { return m_objects; }
 
     void visit( const std::shared_ptr<ObjectHandle>& object ) override
     {
         auto typedObject = std::dynamic_pointer_cast<ObjectType>( object );
-        if ( typedObject && ( !m_selector || m_selector( typedObject ) ) )
+        if ( typedObject && ( !m_selector || m_selector( typedObject.get() ) ) )
         {
             m_objects.push_back( typedObject );
         }
