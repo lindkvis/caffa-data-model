@@ -18,9 +18,11 @@
 // ##################################################################################################
 #pragma once
 
+#include "cafAssert.h"
 #include "cafChildFieldHandle.h"
 #include "cafVisitor.h"
 
+#include <functional>
 #include <list>
 
 namespace caffa
@@ -28,35 +30,31 @@ namespace caffa
 class ObjectHandle;
 
 /**
- * A simple depth first collector of const pointers to objects
+ * A simple depth first object finder which exists as soon as it found a match
  */
 template <typename ObjectType = ObjectHandle>
-class ConstObjectCollector final : public Inspector
+class ConstObjectFinder final : public Inspector
 {
 public:
     using Selector = std::function<bool( const ObjectType* )>;
 
-    explicit ConstObjectCollector( Selector selector = nullptr )
+    explicit ConstObjectFinder( Selector selector = nullptr )
         : m_selector( selector )
     {
     }
 
     void visit( const std::shared_ptr<const ObjectHandle>& object ) override
     {
-        if ( !object ) return;
-
-        auto typedObject = std::dynamic_pointer_cast<const ObjectType>( object );
-        if ( typedObject && ( !m_selector || m_selector( typedObject.get() ) ) )
+        auto typedObject = std::dynamic_pointer_cast<ObjectType>( object );
+        if ( typedObject && ( !m_selector || m_selector( typedObject ) ) )
         {
-            m_objects.push_back( typedObject );
+            m_object = typedObject;
+            return;
         }
 
         for ( const auto field : object->fields() )
         {
-            if ( field->isReadable() )
-            {
-                field->accept( this );
-            }
+            field->accept( this );
         }
     }
 
@@ -70,57 +68,59 @@ public:
 
     void visit( const DataField* field ) override {}
 
-    const std::list<std::shared_ptr<const ObjectType>>& objects() const { return m_objects; }
+    const std::shared_ptr<const ObjectType>& object() const { return m_object; }
 
 private:
-    Selector                                     m_selector;
-    std::list<std::shared_ptr<const ObjectType>> m_objects;
+    Selector                          m_selector;
+    std::shared_ptr<const ObjectType> m_object;
 };
 
 /**
- * A simple depth first collector
+ * A simple depth first object finder which exists as soon as it found a match
  */
 template <typename ObjectType = ObjectHandle>
-class ObjectCollector final : public Editor
+class ObjectFinder : public Editor
 {
 public:
     using Selector = std::function<bool( const ObjectType* )>;
 
-    explicit ObjectCollector( Selector selector = nullptr )
+    explicit ObjectFinder( Selector selector = nullptr )
         : m_selector( selector )
     {
     }
-    const std::list<std::shared_ptr<ObjectType>>& objects() { return m_objects; }
 
     void visit( const std::shared_ptr<ObjectHandle>& object ) override
     {
-        auto typedObject = std::dynamic_pointer_cast<ObjectType>( object );
-        if ( typedObject && ( !m_selector || m_selector( typedObject.get() ) ) )
+        auto typedObject = dynamic_cast<ObjectType*>( object.get() );
+        if ( typedObject && ( !m_selector || m_selector( typedObject ) ) )
         {
-            m_objects.push_back( typedObject );
+            m_object = object;
+            return;
         }
 
         for ( const auto field : object->fields() )
         {
-            if ( field->isWritable() )
-            {
-                field->accept( this );
-            }
+            field->accept( this );
         }
     }
 
     void visit( ChildFieldBaseHandle* field ) override
     {
-        for ( const auto& object : field->childObjects() )
+        if ( field->isReadable() )
         {
-            object->accept( this );
+            for ( const auto& object : field->childObjects() )
+            {
+                object->accept( this );
+            }
         }
     }
 
     void visit( DataField* field ) override {}
 
+    const std::shared_ptr<ObjectType>& object() { return m_object; }
+
 private:
-    Selector                               m_selector;
-    std::list<std::shared_ptr<ObjectType>> m_objects;
+    Selector                    m_selector;
+    std::shared_ptr<ObjectType> m_object;
 };
 } // namespace caffa

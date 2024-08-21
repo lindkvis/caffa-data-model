@@ -63,7 +63,8 @@ bool ObjectHandle::isValidKeyword( const std::string& type )
     return validCount > 0u && invalidCount == 0u;
 }
 
-bool ObjectHandle::matchesClassKeyword( const std::string_view& classKeyword, const std::vector<std::string>& inheritanceStack )
+bool ObjectHandle::matchesClassKeyword( const std::string_view&         classKeyword,
+                                        const std::vector<std::string>& inheritanceStack )
 {
     return std::any_of( inheritanceStack.begin(),
                         inheritanceStack.end(),
@@ -146,7 +147,7 @@ MethodHandle* ObjectHandle::findMethod( const std::string& keyword ) const
 //--------------------------------------------------------------------------------------------------
 void ObjectHandle::accept( Inspector* visitor ) const
 {
-    visitor->visit( this );
+    visitor->visit( shared_from_this() );
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -154,7 +155,7 @@ void ObjectHandle::accept( Inspector* visitor ) const
 //--------------------------------------------------------------------------------------------------
 void ObjectHandle::accept( Editor* editor )
 {
-    editor->visit( this );
+    editor->visit( shared_from_this() );
 }
 
 //--------------------------------------------------------------------------------------------------

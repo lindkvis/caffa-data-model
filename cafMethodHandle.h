@@ -38,10 +38,10 @@ public:
         , m_objectFactory( objectFactory )
     {
     }
-    virtual ~MethodAccessorInterface()                                     = default;
-    virtual std::string execute( const std::string& argumentString ) const = 0;
+    virtual ~MethodAccessorInterface()                                                   = default;
+    [[nodiscard]] virtual std::string execute( const std::string& argumentString ) const = 0;
 
-    ObjectFactory* objectFactory() const { return m_objectFactory; }
+    [[nodiscard]] ObjectFactory* objectFactory() const { return m_objectFactory; }
 
 protected:
     const ObjectHandle* m_selfHandle;
@@ -52,22 +52,26 @@ protected:
 class MethodHandle
 {
 public:
-    MethodHandle()  = default;
-    ~MethodHandle() = default;
+    MethodHandle()
+        : m_isConst( false )
+    {
+    }
+    virtual ~MethodHandle() = default;
 
-    std::string keyword() const { return m_name; }
-    void        setArgumentNames( const std::vector<std::string>& argumentNames ) { m_argumentNames = argumentNames; }
-    const std::vector<std::string>& argumentNames() const { return m_argumentNames; }
+    [[nodiscard]] std::string keyword() const { return m_name; }
+    void setArgumentNames( const std::vector<std::string>& argumentNames ) { m_argumentNames = argumentNames; }
+    [[nodiscard]] const std::vector<std::string>& argumentNames() const { return m_argumentNames; }
 
-    bool               isConst() const { return m_isConst; }
-    void               setConst( bool isConst ) { m_isConst = isConst; }
-    const std::string& documentation() const { return m_documentation; }
-    void               setDocumentation( const std::string& documentation ) { m_documentation = documentation; }
+    [[nodiscard]] bool               isConst() const { return m_isConst; }
+    void                             setConst( bool isConst ) { m_isConst = isConst; }
+    [[nodiscard]] const std::string& documentation() const { return m_documentation; }
+    void setDocumentation( const std::string& documentation ) { m_documentation = documentation; }
 
-    virtual std::string execute( std::shared_ptr<Session> session, const std::string& argumentsString ) const = 0;
-    virtual std::string schema() const                                                                        = 0;
+    [[nodiscard]] virtual std::string execute( std::shared_ptr<Session> session,
+                                               const std::string&       argumentsString ) const = 0;
+    [[nodiscard]] virtual std::string schema() const                                      = 0;
 
-    MethodAccessorInterface* accessor() const { return m_accessor.get(); }
+    [[nodiscard]] MethodAccessorInterface* accessor() const { return m_accessor.get(); }
     void setAccessor( std::unique_ptr<MethodAccessorInterface> accessor ) { m_accessor = std::move( accessor ); }
 
 private:

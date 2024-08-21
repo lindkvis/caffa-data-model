@@ -29,8 +29,7 @@ namespace caffa
 ///
 //------------------------------------- -------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
-ChildField<DataTypePtr>::~ChildField()
+requires is_pointer<DataTypePtr> ChildField<DataTypePtr>::~ChildField()
 {
 }
 
@@ -38,8 +37,8 @@ ChildField<DataTypePtr>::~ChildField()
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
-ChildField<DataTypePtr>& ChildField<DataTypePtr>::operator=( std::shared_ptr<DataType> object )
+requires is_pointer<DataTypePtr> ChildField<DataTypePtr>
+&ChildField<DataTypePtr>::       operator=( std::shared_ptr<DataType> object )
 {
     CAFFA_ASSERT( isInitialized() );
     this->setObject( object );
@@ -50,7 +49,7 @@ ChildField<DataTypePtr>& ChildField<DataTypePtr>::operator=( std::shared_ptr<Dat
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
+requires is_pointer<DataTypePtr>
 bool ChildField<DataTypePtr>::operator==( std::shared_ptr<const ObjectHandle> object ) const
 {
     return this->object() == object;
@@ -60,7 +59,7 @@ bool ChildField<DataTypePtr>::operator==( std::shared_ptr<const ObjectHandle> ob
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
+requires is_pointer<DataTypePtr>
 bool ChildField<DataTypePtr>::operator==( const ObjectHandle* object ) const
 {
     return this->object().get() == object;
@@ -70,7 +69,7 @@ bool ChildField<DataTypePtr>::operator==( const ObjectHandle* object ) const
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
+requires is_pointer<DataTypePtr>
 void ChildField<DataTypePtr>::setObject( std::shared_ptr<DataType> object )
 {
     CAFFA_ASSERT( isInitialized() );
@@ -88,8 +87,7 @@ void ChildField<DataTypePtr>::setObject( std::shared_ptr<DataType> object )
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
-std::vector<std::shared_ptr<ObjectHandle>> ChildField<DataTypePtr>::childObjects()
+requires is_pointer<DataTypePtr> std::vector<std::shared_ptr<ObjectHandle>> ChildField<DataTypePtr>::childObjects()
 {
     CAFFA_ASSERT( isInitialized() );
 
@@ -108,8 +106,8 @@ std::vector<std::shared_ptr<ObjectHandle>> ChildField<DataTypePtr>::childObjects
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
-std::vector<std::shared_ptr<const ObjectHandle>> ChildField<DataTypePtr>::childObjects() const
+requires is_pointer<DataTypePtr> std::vector<std::shared_ptr<const ObjectHandle>> ChildField<DataTypePtr>::childObjects()
+const
 {
     CAFFA_ASSERT( isInitialized() );
 
@@ -128,22 +126,20 @@ std::vector<std::shared_ptr<const ObjectHandle>> ChildField<DataTypePtr>::childO
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
+requires is_pointer<DataTypePtr>
 void ChildField<DataTypePtr>::clear()
 {
     CAFFA_ASSERT( isInitialized() );
-    if ( !m_fieldDataAccessor )
+    if ( m_fieldDataAccessor )
     {
-        throw std::runtime_error( "Failed to clear object for '" + this->keyword() + "': Field is not accessible" );
+        m_fieldDataAccessor->clear();
     }
-
-    m_fieldDataAccessor->clear();
 }
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
+requires is_pointer<DataTypePtr>
 void ChildField<DataTypePtr>::removeChildObject( std::shared_ptr<const ObjectHandle> object )
 {
     CAFFA_ASSERT( isInitialized() );
@@ -163,7 +159,7 @@ void ChildField<DataTypePtr>::removeChildObject( std::shared_ptr<const ObjectHan
 ///
 //--------------------------------------------------------------------------------------------------
 template <typename DataTypePtr>
-    requires is_pointer<DataTypePtr>
+requires is_pointer<DataTypePtr>
 void ChildField<DataTypePtr>::setChildObject( std::shared_ptr<ObjectHandle> object )
 {
     CAFFA_ASSERT( isInitialized() );

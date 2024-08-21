@@ -28,29 +28,46 @@ namespace caffa
  * A simple depth first Editor that performs tasks on objects found
  */
 template <typename ObjectType = ObjectHandle>
-class ObjectPerformer : public Editor
+class ObjectPerformer final : public Editor
 {
 public:
     using Callback = std::function<void( ObjectType* )>;
     using Selector = std::function<bool( const ObjectType* )>;
 
-    ObjectPerformer( Callback callback, Selector selector = nullptr )
+    explicit ObjectPerformer( Callback callback, Selector selector = nullptr )
         : m_selector( selector )
         , m_callback( callback )
     {
     }
 
-private:
-    void visitObject( ObjectHandle* object ) override
+    void visit( const std::shared_ptr<ObjectHandle>& object ) override
     {
-        auto typedObject = dynamic_cast<ObjectType*>( object );
+        if ( !object ) return;
+
+        auto typedObject = dynamic_cast<ObjectType*>( object.get() );
         if ( typedObject && ( !m_selector || m_selector( typedObject ) ) )
         {
             m_callback( typedObject );
         }
+
+        for ( const auto field : object->fields() )
+        {
+            if ( field->isWritable() )
+            {
+                field->accept( this );
+            }
+        }
     }
 
-    void visitField( FieldHandle* field ) override {}
+    void visit( ChildFieldBaseHandle* field ) override
+    {
+        for ( const auto& object : field->childObjects() )
+        {
+            object->accept( this );
+        }
+    }
+
+    void visit( DataField* field ) override {}
 
 private:
     Selector m_selector;
