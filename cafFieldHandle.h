@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cafAssert.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -86,11 +88,7 @@ private:
 template <typename CapabilityType>
 void FieldHandle::addCapability( std::unique_ptr<CapabilityType> capability )
 {
-    if ( this->capability<CapabilityType>() != nullptr )
-    {
-        throw std::runtime_error( "The field " + keyword() + " already has the specified capability" );
-    }
-
+    CAFFA_ASSERT( this->capability<CapabilityType>() == nullptr && "Cannot add more than one of the same capability" );
     capability->setOwner( this );
     m_capabilities.push_back( std::move( capability ) );
 }
