@@ -2,7 +2,8 @@
 
 #include "cafFieldCapability.h"
 #include "cafObjectHandle.h"
-#include "cafVisitor.h"
+
+#include <typeinfo>
 
 namespace caffa
 {
@@ -33,7 +34,7 @@ void FieldHandle::setKeyword( const std::string& keyword )
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-caffa::ObjectHandle* FieldHandle::ownerObject()
+ObjectHandle* FieldHandle::ownerObject()
 {
     return m_ownerObject;
 }
@@ -41,33 +42,9 @@ caffa::ObjectHandle* FieldHandle::ownerObject()
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
-const caffa::ObjectHandle* FieldHandle::ownerObject() const
+const ObjectHandle* FieldHandle::ownerObject() const
 {
     return m_ownerObject;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-std::list<FieldCapability*> FieldHandle::capabilities()
-{
-    std::list<FieldCapability*> allCapabilities;
-    for ( auto& capability : m_capabilities )
-    {
-        allCapabilities.push_back( capability.get() );
-    }
-    return allCapabilities;
-}
-
-//--------------------------------------------------------------------------------------------------
-///
-//--------------------------------------------------------------------------------------------------
-void FieldHandle::addCapability( std::unique_ptr<FieldCapability> capability )
-{
-    capability->setOwner( this );
-
-    // Push to the front, so that any new capability takes precedence over old ones.
-    m_capabilities.push_front( std::move( capability ) );
 }
 
 bool FieldHandle::isDeprecated() const

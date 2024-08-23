@@ -1,8 +1,8 @@
 #pragma once
 
-#include <list>
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace caffa
 {
@@ -28,7 +28,8 @@ public:
     [[nodiscard]] virtual std::string dataType() const = 0;
 
     // Capabilities
-    void addCapability( std::unique_ptr<FieldCapability> capability );
+    template <typename CapabilityType>
+    void addCapability( std::unique_ptr<CapabilityType> capability );
 
     template <typename CapabilityType>
     CapabilityType* capability();
@@ -68,8 +69,6 @@ public:
 protected:
     [[nodiscard]] bool isInitialized() const { return m_ownerObject != nullptr; }
 
-    std::list<FieldCapability*> capabilities();
-
 private:
     friend class ObjectHandle; // Give access to m_ownerObject and set Keyword
     void          setKeyword( const std::string& keyword );
@@ -77,13 +76,24 @@ private:
 
     std::string m_keyword;
 
-    std::list<std::unique_ptr<FieldCapability>> m_capabilities;
+    std::vector<std::unique_ptr<FieldCapability>> m_capabilities;
 
     bool m_isDeprecated;
 
     std::string m_documentation;
 };
 
+template <typename CapabilityType>
+void FieldHandle::addCapability( std::unique_ptr<CapabilityType> capability )
+{
+    if ( this->capability<CapabilityType>() != nullptr )
+    {
+        throw std::runtime_error( "The field " + keyword() + " already has the specified capability" );
+    }
+
+    capability->setOwner( this );
+    m_capabilities.push_back( std::move( capability ) );
+}
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
@@ -92,8 +102,7 @@ CapabilityType* FieldHandle::capability()
 {
     for ( auto& capabilityPtr : m_capabilities )
     {
-        auto* capability = dynamic_cast<CapabilityType*>( capabilityPtr.get() );
-        if ( capability ) return capability;
+        if ( auto* cap = dynamic_cast<CapabilityType*>( capabilityPtr.get() ); cap ) return cap;
     }
     return nullptr;
 }
@@ -106,8 +115,7 @@ const CapabilityType* FieldHandle::capability() const
 {
     for ( const auto& capabilityPtr : m_capabilities )
     {
-        const auto* capability = dynamic_cast<const CapabilityType*>( capabilityPtr.get() );
-        if ( capability ) return capability;
+        if ( const auto* cap = dynamic_cast<const CapabilityType*>( capabilityPtr.get() ); cap ) return cap;
     }
     return nullptr;
 }

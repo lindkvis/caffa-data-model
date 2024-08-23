@@ -12,8 +12,11 @@ public:
 
 protected:
     friend class FieldHandle;
-    virtual const FieldHandle* owner() const                  = 0;
-    virtual void               setOwner( FieldHandle* field ) = 0;
+    FieldHandle* owner() const { return m_field; }
+    void         setOwner( FieldHandle* field ) { m_field = field; }
+
+private:
+    FieldHandle* m_field = nullptr;
 };
 
 } // End of namespace caffa
