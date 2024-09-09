@@ -23,6 +23,11 @@ FieldHandle::~FieldHandle()
 {
 }
 
+void FieldHandle::updateLastModified()
+{
+    m_lastModified = std::chrono::system_clock::now();
+}
+
 //--------------------------------------------------------------------------------------------------
 ///
 //--------------------------------------------------------------------------------------------------
@@ -65,6 +70,11 @@ void FieldHandle::setDocumentation( const std::string& documentation )
 const std::string& FieldHandle::documentation() const
 {
     return m_documentation;
+}
+
+const std::chrono::system_clock::time_point& FieldHandle::lastModified() const
+{
+    return m_lastModified;
 }
 
 } // End of namespace caffa

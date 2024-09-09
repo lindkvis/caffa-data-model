@@ -2,6 +2,7 @@
 
 #include "cafAssert.h"
 
+#include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
@@ -68,8 +69,11 @@ public:
 
     FieldHandle( const FieldHandle& ) = delete;
 
+    const std::chrono::system_clock::time_point& lastModified() const;
+
 protected:
     [[nodiscard]] bool isInitialized() const { return m_ownerObject != nullptr; }
+    void               updateLastModified();
 
 private:
     friend class ObjectHandle; // Give access to m_ownerObject and set Keyword
@@ -83,6 +87,8 @@ private:
     bool m_isDeprecated;
 
     std::string m_documentation;
+
+    std::chrono::system_clock::time_point m_lastModified;
 };
 
 template <typename CapabilityType>

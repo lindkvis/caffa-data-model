@@ -139,6 +139,7 @@ public:
                 }
             }
             m_fieldDataAccessor->setValue( fieldValue );
+            this->updateLastModified();
         }
         catch ( const std::exception& e )
         {

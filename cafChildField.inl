@@ -81,6 +81,8 @@ void ChildField<DataTypePtr>::setObject( std::shared_ptr<DataType> object )
     }
 
     m_fieldDataAccessor->setObject( object );
+
+    updateLastModified();
 }
 
 //--------------------------------------------------------------------------------------------------
