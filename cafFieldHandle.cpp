@@ -13,6 +13,7 @@ namespace caffa
 FieldHandle::FieldHandle()
     : m_ownerObject( nullptr )
     , m_isDeprecated( false )
+    , m_volatile( false )
 {
 }
 
@@ -21,11 +22,6 @@ FieldHandle::FieldHandle()
 //--------------------------------------------------------------------------------------------------
 FieldHandle::~FieldHandle()
 {
-}
-
-void FieldHandle::updateLastModified()
-{
-    m_lastModified = std::chrono::system_clock::now();
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -75,6 +71,20 @@ const std::string& FieldHandle::documentation() const
 const std::chrono::system_clock::time_point& FieldHandle::lastModified() const
 {
     return m_lastModified;
+}
+
+void FieldHandle::updateLastModified()
+{
+    m_lastModified = std::chrono::system_clock::now();
+}
+
+bool FieldHandle::isVolatile() const
+{
+    return m_volatile;
+}
+void FieldHandle::markVolatile()
+{
+    m_volatile = true;
 }
 
 } // End of namespace caffa

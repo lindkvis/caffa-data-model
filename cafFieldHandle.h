@@ -71,6 +71,17 @@ public:
 
     const std::chrono::system_clock::time_point& lastModified() const;
 
+    /**
+     * Is the field volatile (can be changed external means)
+     * @return true if volatile
+     */
+    bool isVolatile() const;
+
+    /**
+     * Mark the field as volatile (can be changed external means)
+     */
+    void markVolatile();
+
 protected:
     [[nodiscard]] bool isInitialized() const { return m_ownerObject != nullptr; }
     void               updateLastModified();
@@ -85,6 +96,7 @@ private:
     std::vector<std::unique_ptr<FieldCapability>> m_capabilities;
 
     bool m_isDeprecated;
+    bool m_volatile;
 
     std::string m_documentation;
 
