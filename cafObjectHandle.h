@@ -161,10 +161,10 @@ private:
     std::string m_uuid;
 
     // Fields
-    std::map<std::string, FieldHandle*> m_fields;
+    std::unordered_map<std::string, FieldHandle*> m_fields;
 
     // Methods
-    std::map<std::string, MethodHandle*> m_methods;
+    std::unordered_map<std::string, MethodHandle*> m_methods;
 };
 
 template <typename T>
