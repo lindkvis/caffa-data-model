@@ -13,6 +13,7 @@ namespace caffa
 FieldHandle::FieldHandle()
     : m_ownerObject( nullptr )
     , m_isDeprecated( false )
+    , m_volatile( false )
 {
 }
 
@@ -65,6 +66,15 @@ void FieldHandle::setDocumentation( const std::string& documentation )
 const std::string& FieldHandle::documentation() const
 {
     return m_documentation;
+}
+
+bool FieldHandle::isVolatile() const
+{
+    return m_volatile;
+}
+void FieldHandle::markVolatile()
+{
+    m_volatile = true;
 }
 
 } // End of namespace caffa
