@@ -27,8 +27,8 @@
 
 #include <map>
 #include <memory>
+#include <ranges>
 #include <string>
-#include <vector>
 
 namespace caffa
 {
@@ -46,7 +46,7 @@ public:
 
     [[nodiscard]] std::string name() const override { return "Default ObjectFactory"; }
 
-    [[nodiscard]] std::list<std::string> classes() const;
+    [[nodiscard]] std::ranges::view auto classes() const { return std::views::keys( m_factoryMap ); }
 
     template <typename ObjectBaseDerivative>
     bool registerCreator()

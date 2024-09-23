@@ -79,7 +79,7 @@ public:
 
     // Basic access
 
-    DataType value() const override
+    [[nodiscard]] DataType value() const override
     {
         CAFFA_ASSERT( this->isInitialized() );
 
@@ -151,9 +151,9 @@ public:
     // Access operators
 
     /*Conversion */
-             operator DataType() const { return this->value(); }
-    DataType operator()() const { return this->value(); }
-    DataType operator*() const { return this->value(); }
+    [[nodiscard]] operator DataType() const { return this->value(); }
+    [[nodiscard]] DataType operator()() const { return this->value(); }
+    [[nodiscard]] DataType operator*() const { return this->value(); }
 
     auto operator<=>( const DataType& fieldValue ) const { return this->value() <=> fieldValue; }
 
