@@ -151,7 +151,7 @@ public:
     // Access operators
 
     /*Conversion */
-             operator DataType() const { return this->value(); }
+    operator DataType() const { return this->value(); }
     DataType operator()() const { return this->value(); }
     DataType operator*() const { return this->value(); }
 
