@@ -75,6 +75,8 @@ set(PROJECT_FILES
         cafDefaultObjectFactory.cpp
 )
 
+find_package(Boost 1.74.0 REQUIRED COMPONENTS regex)
+
 if (CAFFA_BUILD_SHARED)
     message(STATUS "Building ${PROJECT_NAME} shared")
     add_library(${PROJECT_NAME} SHARED ${PROJECT_FILES})
@@ -93,7 +95,7 @@ endif ()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC caffaBase)
+target_link_libraries(${PROJECT_NAME} PUBLIC caffaBase Boost::regex)
 
 if (CAFFA_BUILD_UNIT_TESTS)
     add_subdirectory(DataModel_UnitTests)

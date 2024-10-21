@@ -5,6 +5,9 @@
     {
       "name": "gtest",
       "platform": "!linux"
+    },
+    {
+      "name": "boost-regex"
     }
   ]
 }
