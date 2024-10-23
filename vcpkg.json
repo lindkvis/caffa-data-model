@@ -3,8 +3,7 @@
   "version-string": "latest",
   "dependencies": [
     {
-      "name": "gtest",
-      "platform": "!linux"
+      "name": "gtest"
     },
     {
       "name": "boost-regex"
