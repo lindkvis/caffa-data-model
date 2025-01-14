@@ -97,6 +97,12 @@ struct PortableDataType<std::chrono::steady_clock::time_point>
 };
 
 template <>
+struct PortableDataType<std::chrono::system_clock::time_point>
+{
+    static std::string name() { return "time_ns"; }
+};
+
+template <>
 struct PortableDataType<std::chrono::nanoseconds>
 {
     static std::string name() { return "nanoseconds"; }
