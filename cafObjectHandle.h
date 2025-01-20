@@ -129,7 +129,7 @@ public:
 
     /// Method gets called from Document after all objects are read.
     /// Re-implement to set up internal pointers etc. in your data structure
-    virtual void initAfterRead(){};
+    virtual void initAfterRead() {};
 
     /**
      * Accept the visit by an inspecting visitor
@@ -161,10 +161,10 @@ private:
     std::string m_uuid;
 
     // Fields
-    std::unordered_map<std::string, FieldHandle*> m_fields;
+    std::map<std::string, FieldHandle*> m_fields;
 
     // Methods
-    std::unordered_map<std::string, MethodHandle*> m_methods;
+    std::map<std::string, MethodHandle*> m_methods;
 };
 
 template <typename T>
