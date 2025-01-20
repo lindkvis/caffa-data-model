@@ -74,6 +74,14 @@ public:
     using GetterMethod = typename GetterMethodCB<DataType>::GetterMethodType;
     using SetterMethod = typename SetterMethodCB<DataType>::SetterMethodType;
 
+    static std::unique_ptr<FieldProxyAccessor<DataType>> create( GetterMethod getterMethod, SetterMethod setterMethod )
+    {
+        auto accessor = std::make_unique<FieldProxyAccessor<DataType>>();
+        accessor->registerGetMethod( getterMethod );
+        accessor->registerSetMethod( setterMethod );
+        return accessor;
+    }
+
     std::unique_ptr<DataFieldAccessor<DataType>> clone() const override
     {
         auto copy           = std::make_unique<FieldProxyAccessor>();
