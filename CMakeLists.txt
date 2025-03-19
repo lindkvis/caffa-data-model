@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(CAFFA_VERSION 1.5.2)
-
-project(caffaDataModel)
+set(CAFFA_DATA_MODEL_VERSION 1.7.1)
+project(caffaDataModel VERSION ${CAFFA_DATA_MODEL_VERSION} DESCRIPTION "Caffa Data Model Library")
 
 include(cmake/git_submodule.cmake)
 
@@ -84,8 +83,8 @@ else ()
     add_library(${PROJECT_NAME} STATIC ${PROJECT_FILES})
 endif ()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${CMAKE_PROJECT_VERSION})
-set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR})
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
+set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION_MAJOR})
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
 
 if (MSVC)
